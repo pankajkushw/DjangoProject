@@ -21,7 +21,7 @@ from help_page import views
 from django.conf.urls import include
 urlpatterns = [
     
-    path('first_app/', include('first_app.urls')),
+    path('', include('first_app.urls')),
     path('help/', include('help_page.urls')),
     path('admin/', admin.site.urls),
 ]
