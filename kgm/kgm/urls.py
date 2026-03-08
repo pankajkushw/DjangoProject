@@ -1,5 +1,5 @@
 """
-URL configuration for basic_forms project.
+URL configuration for kgm project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/6.0/topics/http/urls/
@@ -15,11 +15,11 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
-from basicforms import views
+from django.urls import path, include
 
 urlpatterns = [
-    path('', views.index, name="index"),
+    path('', include('home.urls')),
+    path('login/',include('login_app.urls')),
     path('admin/', admin.site.urls),
-    path('formpage/', views.form_name_view, name="form_name")
+
 ]

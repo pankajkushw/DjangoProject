@@ -1,5 +1,6 @@
 from django.shortcuts import render
-from appTwo.models import User
+#instead of taking view data from view we will take it from forms
+from appTwo.forms import NewUserForm
 # Create your views here.
 
 
@@ -7,7 +8,18 @@ def index(request):
     return render(request, 'appTwo/index.html')
 
 def users(request):
-    user_list = User.objects.order_by('first_name')
-    user_dict = {'user_lst': user_list}
+    form = NewUserForm()
+    
+    if request.method == "POST":
+        form = NewUserForm(request.POST)
 
-    return render(request, 'appTwo/Users.html', context=user_dict)
+    if form.is_valid():
+        form.save(commit=True)
+        return index(request)
+    else:
+        print("Error form invalid")
+    return render(request, 'appTwo/users.html', {'form':form})
+    
+
+
+

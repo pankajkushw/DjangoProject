@@ -3,15 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Page</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-    <title>home page of the webiste</title>
+
 </head>
 <body>
+    
     <div class="container">
-        <div class="jumbotron">
-            <h1>Working !</h1>
-            <h2>Go /users to Signup</h2>
-        </div>
+        <h1>Enter values in form</h1>
+        <form method="post">
+            {{ form.as_p }}
+            {% csrf_token %}
+            <input type="submit" class="btn btn-priamry" value="Submit">
+        </form>
     </div>
 </body>
 </html>
