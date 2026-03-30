@@ -20,4 +20,27 @@
     <p class="text-center">No images uploaded yet.</p>
   {% endfor %}
   </div>
+  
+  <div class="mt-5">
+    <h2 class="text-center text-secondary">Temple Galary (Old)</h2>
+    <div id="carouselex" class="carousel slide">
+      <div class="carousel-inner">
+        {% for img in images %}
+        <div class="carousel-item">
+          <img src="{{ img.image.url }}" class="d-block w-100" alt="">
+        </div>
+        {% endfor %}
+        
+      </div>
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
+    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
+    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Next</span>
+    </button>
+  </div>
+
 {% endblock %}

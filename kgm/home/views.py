@@ -13,7 +13,8 @@ def about(request):
     return render(request, "home/about.html")
 
 def events(request):
-    return render(request, "home/events.html")
+    events_list = Event.objects.order_by('date')[:3]
+    return render(request, 'home/events.html', {'events': events_list})
 
 def gallery(request):
     images = GalleryImage.objects.all()
