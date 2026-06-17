@@ -11,10 +11,12 @@ from accounts.common.tasks import send_email
 # Create your views here.
 def home(request: HttpRequest):
     return render(request, "home.html")
+
 def login(request: HttpRequest):
     if request.POST == "POST":
         email:str = request.POST.get("email")
         password:str = request.POST.get("password")
+
         user = auth.authenticate(request, email=email, password=password)
 
         if user is not None:
@@ -23,14 +25,14 @@ def login(request: HttpRequest):
             return redirect("home")
         else: 
             messages.error(request, "Invalid credentials")
-            return redirect("login.html")
+            return redirect("login")
 
     else:
         return render(request, "login.html")
 
 def logout(request: HttpRequest):
     auth.logout(request)
-    messages.success(request, "You are not loged out")
+    messages.success(request, "You are now loged out")
     return redirect("home")
 
 
@@ -41,7 +43,7 @@ def register(request: HttpRequest):
         cleaned_email = email.lower()
 
         if User.objects.filter(email=cleaned_email).exists():
-            messages.error(request, "Email exist on the platform, Please login using your credentials!")
+            messages.error(request, "User already exist, Please login using your credentials.")
             return redirect("login")
         else:
             verification_code = get_random_string(10)
