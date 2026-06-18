@@ -21,7 +21,7 @@ def login(request: HttpRequest):
 
         if user is not None:
             auth.login(request, user)
-            messages.success(request, "You are now logged in")
+            messages.success(request, "Account verified. You are loged in!!")
             return redirect("home")
         else: 
             messages.error(request, "Invalid credentials")
