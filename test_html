@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pradhan Mantri Awas Yojana - Gramin</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+<!-- Header -->
+<header class="bg-primary text-white text-center py-3">
+  <h1 class="h3">Pradhan Mantri Awas Yojana - Gramin (PMAY-G)</h1>
+  <p class="mb-1">कार्यालय प्रधानमंत्री आवास योजना-ग्रामीण, नवा रायपुर, अटल नगर, छत्तीसगढ़</p>
+  <p class="mb-0">
+    📞 <a href="tel:18002331290" class="text-white">1800-233-1290</a> | ✉️ rd.pmaycg@gmail.com
+  </p>
+</header>
+
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container">
+    <a class="navbar-brand" href="#">PMAY-G</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link active" href="#">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Recruitment</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">About</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Contact</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<div class="container my-4">
+  <div class="card shadow">
+    <div class="card-body">
+      <h2 class="card-title text-primary">Recruitment</h2>
+      <p>ऑनलाइन आवेदन आमंत्रित किये जाते है :-</p>
+      <ul class="list-group">
+        <li class="list-group-item">राज्य कार्यालय हेतु 3 - नीत संविदा पदों की भर्ती के सम्बन्ध में पात्र-अपात्र की सूची एवं सूचना</li>
+        <li class="list-group-item">संविदा भर्ती विज्ञापन (संपादित पत्र)</li>
+        <li class="list-group-item">संविदा भर्ती विज्ञापन</li>
+        <li class="list-group-item"><a href="#">ऑनलाइन आवेदन</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="bg-primary text-white text-center py-3 mt-4">
+  <p class="mb-0">Copyright ©2026 : All Rights Reserved - Pradhan Mantri Awas Yojna - Gramin</p>
+  <p class="mb-0">Contents owned & updated by Govt. of Chhattisgarh</p>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

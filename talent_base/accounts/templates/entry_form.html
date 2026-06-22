@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+
+{% comment %}
+{% load humanize %}
+{% endcomment %}
+
+{% block title %} Job Portal |  {% endblock %}
+
+{% block content %}
+
+{% include 'header.html' %}
+
+<section>
+       <h2>👥 Personal Details </h2>
+       <hr style="height: 5px; border-width: 0; background-color: blue;">
+        <form action="{% url 'register' %}" method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="c_name" class="form-label">Name</label>
+                <input type="text" name="c_name" id="c_name" class="form-control" placeholder="Enter your name" required>
+            </div>
+            <div class="form-group">
+                <label for="f_name" class="form-label">Father Name</label>
+                <input type="text" name="f_name" id="f_name" class="form-control" placeholder="Enter your father name" required>
+            </div>
+            <div class="form-group">
+                <label for="m_name" class="form-label">Mother Name</label>
+                <input type="text" name="m_name" id="m_name" class="form-control" placeholder="Enter your mother name" required>
+            </div>
+            <div class="form-group">
+                <label for="c_name" class="form-label">Date of Birth</label>
+                <input type="date" name="c_dob" id="c_dob" class="form-control" placeholder="Enter your Date of Birth" required>
+            </div>                
+            <div class="form-group">
+                <fieldset>
+                    <label for="c_cat" class="form-label">Category</label>
+                    <legend>Select Your Category</legend>
+                    
+                    <div class="radio-group">
+                        <input type="radio" id="general" name="category" value="General" required>
+                        <label for="general">General</label>
+                    </div>
+
+                    <div class="radio-group">
+                        <input type="radio" id="obc-ncl" name="category" value="OBC-NCL">
+                        <label for="obc-ncl">OBC (NCL)</label>
+                    </div>
+
+                    <div class="radio-group">
+                        <input type="radio" id="sc" name="category" value="SC">
+                        <label for="sc">SC</label>
+                    </div>
+
+                    <div class="radio-group">
+                        <input type="radio" id="st" name="category" value="ST">
+                        <label for="st">ST</label>
+                    </div>
+                </fieldset>
+            </div>
+            <h2>🎓 Education Details </h2>
+            <hr style="height: 5px; border-width: 0; background-color: blue;">
+            <div class="form-group">
+            </div>                
+            <h2>👨🏻‍💻 Experience Details </h2>
+            <hr style="height: 5px; border-width: 0; background-color: blue;">
+            <div class="form-group">
+            <fieldset>
+            <legend>Work Experience Details</legend>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th class="col-job">Job Title</th>
+                        <th class="col-company">Company</th>
+                        <th class="col-date">Start Date</th>
+                        <th class="col-date">End Date</th>
+                        <th class="col-action">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="experience-table-body">
+                    <tr>
+                        <td>
+                            <input type="text" name="job_title[]" placeholder="e.g. Developer" required>
+                        </td>
+                        <td>
+                            <input type="text" name="company[]" placeholder="e.g. Google" required>
+                        </td>
+                        <td>
+                            <input type="date" name="start_date[]" required>
+                        </td>
+                        <td>
+                            <input type="date" name="end_date[]">
+                        </td>
+                        <td style="text-align: center;">
+                            <span style="color: #999; font-size: 0.85rem;">-</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="btn-container">
+                <button type="button" class="btn-add" onclick="addTableRow()">➕ Add More Experience</button>
+            </div>
+        </fieldset>
+            </div>                
+
+            <h2>📤 Required File attachments </h2>
+            <hr style="height: 5px; border-width: 0; background-color: blue;">
+
+            <button type="submit" class="btn">💾 Preview & Submit</button>
+        </form>
+</section>
+
+
+
+
+
+
+
+{% endblock %}
+
