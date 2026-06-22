@@ -1,12 +1,12 @@
 from django.shortcuts import render, redirect
 from django.http import HttpRequest
-from .models import User, PendingUser
+from .models import User, PendingUser, Token, TokenType
 from django.contrib import messages, auth
 from django.utils.crypto import get_random_string
 from django.contrib.auth.hashers import make_password
 from datetime import datetime, timezone
 from accounts.common.tasks import send_email
-
+from django.contrib.auth import get_user_model
 
 # Create your views here.
 def home(request: HttpRequest):
@@ -90,3 +90,52 @@ def verify_account(request: HttpRequest):
         else:
             messages.error(request, "Invalid or expired verification code")
             return render(request, "verify_account.html", context = {"email": email}, status=400)
+        
+def send_password_reset_link(request: HttpRequest):
+    if request.method == "POST":
+        email: str = request.POST.get("email","")
+        user = get_user_model().objects.filter(email=email.lower()).first()
+
+        if user:
+            token, _ = Token.objects.update_or_create(
+                user=user,
+                token_type = TokenType.PASSWORD_RESET,
+                defaults= {
+                    "token": get_random_string(20),
+                    "created_at": datetime.now(timezone.utc),
+                }
+            )
+            email_data = {
+                "email": email.lower(),
+                "token": token.token
+            }
+            send_email(
+                "Your password reset link",
+                [email],
+                "emails/password_reset_template.html",
+                email_data
+            )
+            messages.success(request, "reset link sent to your email.")
+            return redirect(request, "reset_password_via_email")
+            
+        else:
+            messages.error(request, "email not found")
+            return redirect("reset_password_via_email")
+
+    else:
+        return render(request, "forgot_password.html")
+    
+def verify_password_reset_link(request: HttpRequest):
+
+    email = request.GET.get("email")
+    reset_token = request.GET.get("token")
+
+    token = Token.objects.filter(
+        user_email = email, token=reset_token, token_type=TokenType.PASSWORD_RESET
+    ).first()
+
+    if not token or not token.is_valid():
+        messages.error(request, "Invalid or expired reset link")
+        return redirect("reset_password_via_email")
+    else:
+        return render(request, "set_new_password_using_reset_token.html")
