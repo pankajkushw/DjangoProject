@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% comment %}
 {% load humanize %}
 {% endcomment %}
@@ -17,8 +17,8 @@
       <h2 class="card-title text-primary">Recruitment</h2>
       <p>ऑनलाइन आवेदन आमंत्रित किये जाते है :-</p>
       <ul class="list-group">
-        <li class="list-group-item">संविदा भर्ती विज्ञापन (संपादित पत्र)</li>
-        <li class="list-group-item">संविदा भर्ती विज्ञापन</li>
+        <li class="list-group-item"><a href="{% static 'VIGYAPAN1.pdf' %}">संविदा भर्ती विज्ञापन (संपादित पत्र)</a></li>
+        <li class="list-group-item"><a href="{% static 'VIGYAPAN1.pdf' %}">संविदा भर्ती विज्ञापन</a></li>
         <li class="list-group-item"><a href="{% url 'register' %}">ऑनलाइन आवेदन</a></li>
       </ul>
     </div>

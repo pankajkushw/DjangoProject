@@ -1,3 +1,5 @@
+from urllib import request
+
 from django.shortcuts import render, redirect
 from django.http import HttpRequest
 from .models import User, PendingUser, Token, TokenType
@@ -22,7 +24,7 @@ def login(request: HttpRequest):
         if user is not None:
             auth.login(request, user)
             messages.success(request, "Account verified. You are loged in!!")
-            return redirect("home")
+            return redirect("recurtiment_data_input")
         else: 
             messages.error(request, "Invalid credentials")
             return redirect("login")
@@ -37,6 +39,7 @@ def logout(request: HttpRequest):
 
 
 def register(request: HttpRequest):
+    messages.error(request, "reached register")
     if request.method == "POST":
         email: str = request.POST["email"]
         password : str = request.POST["password"]
@@ -86,7 +89,7 @@ def verify_account(request: HttpRequest):
             pending_user.delete()
             auth.login(request, user)
             messages.success(request, "Account verified. You are loged in!!")
-            return redirect("home")
+            return redirect("recurtiment_data_input")
         else:
             messages.error(request, "Invalid or expired verification code")
             return render(request, "verify_account.html", context = {"email": email}, status=400)
@@ -139,3 +142,13 @@ def verify_password_reset_link(request: HttpRequest):
         return redirect("reset_password_via_email")
     else:
         return render(request, "set_new_password_using_reset_token.html")
+    
+def recurtiment_data_input(request: HttpRequest):
+    if request.method == "POST":
+        # Process the form data here
+        # For example, you can access the form fields using request.POST.get('field_name')
+        # and save the data to the database or perform any other necessary actions.
+        
+        # After processing the form data, you can redirect to a success page or render a template.
+        messages.success(request, "Recruitment data submitted successfully.")
+        return render(request, "recurtiment_data_input.html")

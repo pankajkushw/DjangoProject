@@ -11,7 +11,7 @@
       <div class="auth-header">
         <h2><span class="icon">🔓</span> Login</h2>
       </div>
-      <form method="post" action="{% url 'home' %}">
+      <form method="post" action="{% url 'login' %}">
         {% csrf_token %}
         <div class="form-group">
           <label for="email" class="form-label">Email</label>
