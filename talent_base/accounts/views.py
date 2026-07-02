@@ -46,7 +46,7 @@ def register(request: HttpRequest):
         cleaned_email = email.lower()
 
         if User.objects.filter(email=cleaned_email).exists():
-            messages.error(request, "User already exist, Please login using your credentials.")
+            messages.error(request, "Please login using your credentials.")
             return redirect("login")
         else:
             verification_code = get_random_string(10)

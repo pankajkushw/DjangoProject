@@ -6,6 +6,11 @@ from accounts.common.models import BaseModel
 import uuid
 # Create your models here.
 
+# accounts/models.py
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
+from django.db import models
+
+
 class User(BaseModel, AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True)
     password = models.CharField(max_length=255)
@@ -13,9 +18,8 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = []
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
-
+    is_superuser = models.BooleanField(default=False)
     objects = CustomUserManager()
-
 
 class PendingUser(BaseModel):
     email = models.EmailField()

@@ -5,19 +5,22 @@ class CustomUserManager(BaseUserManager):
     """
     Custom user model manager where emial  is uniqe identifieer
     """
-    def create_user(self, email, password,  **extra_fieldss):
+    def create_user(self, email, password,  **extra_fields):
         """
         create and save User with the given email and password
         """
         if not email:
             raise ValueError("Email musst be set")
         
-        user = self.model(email=email, **extra_fieldss)
+        email = self.normalize_email(email)
+        user = self.model(email=email, **extra_fields)
+
         user.set_password(password)
+        user.save()
 
         return user;
 
-    def create_super_user(self, email, password, **extra_fields):
+    def create_superuser(self, email, password, **extra_fields):
         """
         Create and save a super user with given email and password
         """
@@ -26,12 +29,13 @@ class CustomUserManager(BaseUserManager):
         extra_fields.setdefault("is_active", True)
 
 
-        if extra_fields.get("is_stuff") is not True:
+        if extra_fields.get("is_staff") is not True:
             raise ValueError("Superuser must have is_staff=True")
         if extra_fields.get("is_superuser") is not True:
             raise ValueError("Superuser must have is_superuser=True")
         
-        user = self.create_user(email, password, **extra_fields)
+        return self.create_user(email, password, **extra_fields)
+       
 
    
 
