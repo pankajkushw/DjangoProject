@@ -15,16 +15,17 @@ def home(request: HttpRequest):
     return render(request, "home.html")
 
 def login(request: HttpRequest):
-    if request.POST == "POST":
+
+    if request.method == "POST":
         email:str = request.POST.get("email")
         password:str = request.POST.get("password")
-
+        messages.error(request, "reached login")
         user = auth.authenticate(request, email=email, password=password)
-
+        
         if user is not None:
             auth.login(request, user)
-            messages.success(request, "Account verified. You are loged in!!")
-            return redirect("recurtiment_data_input")
+            messages.success(request, "Account verified. Please login again to submit your details!!")
+            return redirect("recurtiment_data_input") # if successful login, redirect to the recurtiment_data_input page
         else: 
             messages.error(request, "Invalid credentials")
             return redirect("login")
@@ -39,14 +40,14 @@ def logout(request: HttpRequest):
 
 
 def register(request: HttpRequest):
-    messages.error(request, "reached register")
+
     if request.method == "POST":
         email: str = request.POST["email"]
         password : str = request.POST["password"]
         cleaned_email = email.lower()
 
         if User.objects.filter(email=cleaned_email).exists():
-            messages.error(request, "Please login using your credentials.")
+            messages.error(request, "email ID exist, Please login using your credentials.")
             return redirect("login")
         else:
             verification_code = get_random_string(10)
@@ -88,8 +89,8 @@ def verify_account(request: HttpRequest):
             )
             pending_user.delete()
             auth.login(request, user)
-            messages.success(request, "Account verified. You are loged in!!")
-            return redirect("recurtiment_data_input")
+            messages.success(request, "Account verified. Please login again to submit your details!!")
+            return redirect("login")
         else:
             messages.error(request, "Invalid or expired verification code")
             return render(request, "verify_account.html", context = {"email": email}, status=400)
@@ -148,7 +149,4 @@ def recurtiment_data_input(request: HttpRequest):
         # Process the form data here
         # For example, you can access the form fields using request.POST.get('field_name')
         # and save the data to the database or perform any other necessary actions.
-        
-        # After processing the form data, you can redirect to a success page or render a template.
-        messages.success(request, "Recruitment data submitted successfully.")
-        return render(request, "recurtiment_data_input.html")
+        messages.success(request, "Data submitted successfully!")
