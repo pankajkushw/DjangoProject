@@ -58,3 +58,107 @@ class Token(models.Model):
         if timediff > lifespan_in_seconds:
             return False
         return True
+    
+from django.db import models
+from django.contrib.auth.models import User
+from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.exceptions import ValidationError
+from datetime import date
+
+# Base abstract model assuming you have a custom BaseModel handling created_at/updated_at
+class BaseModel(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        abstract = True
+
+
+class CandidateDetails(BaseModel):
+    CATEGORY_CHOICES = [
+        ('General', 'General'),
+        ('OBC-NCL', 'OBC (Non-Creamy Layer)'),
+        ('SC', 'Scheduled Caste'),
+        ('ST', 'Scheduled Tribe'),
+    ]
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='candidate_profile')
+    
+    # Kept if separate from auth user names, otherwise remove and use user.first_name
+    first_name = models.CharField(max_length=255)
+    last_name = models.CharField(max_length=255)
+    
+    father_name = models.CharField(max_length=255)
+    mother_name = models.CharField(max_length=255)
+    date_of_birth = models.DateField()
+    
+    # File attachments (Make blank=True if they don't upload them instantly on step 1)
+    date_of_birth_certificate = models.FileField(upload_to='dob_certificates/', blank=True, null=True)
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
+    category_certificate = models.FileField(upload_to='category_certificates/', blank=True, null=True)
+    
+    phone_number = models.CharField(max_length=20)
+    address = models.TextField()
+    city = models.CharField(max_length=100)
+    state = models.CharField(max_length=100)
+    country = models.CharField(max_length=100, default="India")
+    zip_code = models.CharField(max_length=20)
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name} ({self.user.username})"
+
+
+class EducationDetails(BaseModel):
+    candidate = models.ForeignKey(CandidateDetails, on_delete=models.CASCADE, related_name='educations')
+    degree = models.CharField(max_length=255)
+    institution = models.CharField(max_length=255)
+    university = models.CharField(max_length=255)
+    
+    # Safe validation bounds for graduation year
+    year_of_passing = models.PositiveIntegerField(
+        validators=[MinValueValidator(1950), MaxValueValidator(date.today().year + 5)]
+    )
+    
+    marks_obtained = models.FloatField()
+    total_marks = models.FloatField()
+    percentage = models.FloatField(editable=False) # Auto-calculated, protected from tampering
+    grade = models.CharField(max_length=10, blank=True)
+    degree_certificate = models.FileField(upload_to='degree_certificates/', blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        # Automated math calculation step
+        if self.total_marks > 0:
+            self.percentage = round((self.marks_obtained / self.total_marks) * 100, 2)
+        else:
+            self.percentage = 0.0
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.degree} - {self.institution}"
+
+
+class WorkExperience(BaseModel):
+    candidate = models.ForeignKey(CandidateDetails, on_delete=models.CASCADE, related_name='experiences')
+    company_name = models.CharField(max_length=255)
+    position = models.CharField(max_length=255)
+    start_date = models.DateField()
+    
+    # Nullable end_date to support "Currently Working Here" states
+    end_date = models.DateField(null=True, blank=True) 
+    responsibilities = models.TextField(blank=True)
+    experience_certificate = models.FileField(upload_to='experience_certificates/', blank=True, null=True) 
+
+    def clean(self):
+        super().clean()
+        # Prevent chronologically impossible setups
+        if self.end_date and self.start_date and self.end_date < self.start_date:
+            raise ValidationError({'end_date': "End date cannot be earlier than the start date."})
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.position} at {self.company_name}"
+
+
