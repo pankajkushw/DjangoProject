@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+
+{% comment %}
+{% load humanize %}
+{% endcomment %}
+
+{% block title %} Job Portal |  {% endblock %}
+
+{% block content %}
+
+{% include 'header.html' %}
+
+<section>
+       <h2>👥 Personal Details </h2>
+       <hr style="height: 5px; border-width: 0; background-color: blue;">
+        <form action="{% url 'recurtiment_data_input' %}" method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="c_name" class="form-label">Name</label>
+                <input type="text" name="c_name" id="c_name" class="form-control" placeholder="Enter your name" required>
+            </div>
+            <div class="form-group">
+                <label for="f_name" class="form-label">Father Name</label>
+                <input type="text" name="f_name" id="f_name" class="form-control" placeholder="Enter your father name" required>
+            </div>
+            <div class="form-group">
+                <label for="m_name" class="form-label">Mother Name</label>
+                <input type="text" name="m_name" id="m_name" class="form-control" placeholder="Enter your mother name" required>
+            </div>
+            <div class="form-group">
+                <label for="c_name" class="form-label">Date of Birth</label>
+                <input type="date" name="c_dob" id="c_dob" class="form-control" placeholder="Enter your Date of Birth" required>
+            </div>                
+            <div class="form-group">
+                <fieldset>
+                    <label for="c_cat" class="form-label">Category</label>
+                    <legend>Select Your Category</legend>
+                    
+                    <div class="radio-group">
+                        <input type="radio" id="general" name="category" value="General" required>
+                        <label for="general">General</label>
+                    </div>
+
+                    <div class="radio-group">
+                        <input type="radio" id="obc-ncl" name="category" value="OBC-NCL">
+                        <label for="obc-ncl">OBC (NCL)</label>
+                    </div>
+
+                    <div class="radio-group">
+                        <input type="radio" id="sc" name="category" value="SC">
+                        <label for="sc">SC</label>
+                    </div>
+
+                    <div class="radio-group">
+                        <input type="radio" id="st" name="category" value="ST">
+                        <label for="st">ST</label>
+                    </div>
+                </fieldset>
+            </div>
+            <h2>🎓 Education Details </h2>
+            <hr style="height: 5px; border-width: 0; background-color: blue;">
+            <div class="form-group">
+            </div>                
+<!-- Section 3: Experience Details Table Setup -->
+<section class="section-card">
+    <h2 class="section-title"><span>👨🏻‍💻</span> Experience Details</h2>
+    
+    <!-- CRITICAL: Tracks row index additions for Django form handling -->
+    {{ formset.management_form }}
+    
+    <div class="table-responsive">
+        <table class="exp-table">
+            <thead>
+                <tr>
+                    <th style="width: 30%;">Job Title</th>
+                    <th style="width: 30%;">Company</th>
+                    <th style="width: 20%;">Start Date</th>
+                    <th style="width: 20%;">End Date</th>
+                    <th style="width: 10%; text-align: center;">Action</th>
+                </tr>
+            </thead>
+            <tbody id="experience-table-body">
+                {% for fs_form in formset %}
+                    <tr class="formset-row">
+                        <!-- Render hidden ID fields for existing records tracking -->
+                        {% for hidden in fs_form.hidden_fields %}
+                            {{ hidden }}
+                        {% endfor %}
+                        <td>
+                            {{ fs_form.position }}
+                            {{ fs_form.position.errors }}
+                        </td>
+                        <td>
+                            {{ fs_form.company_name }}
+                            {{ fs_form.company_name.errors }}
+                        </td>
+                        <td>
+                            {{ fs_form.start_date }}
+                            {{ fs_form.start_date.errors }}
+                        </td>
+                        <td>
+                            {{ fs_form.end_date }}
+                            {{ fs_form.end_date.errors }}
+                        </td>
+                        <td style="text-align: center; vertical-align: middle;">
+                            {% if formset.can_delete %}
+                                <div style="display:none;">{{ fs_form.DELETE }}</div>
+                            {% endif %}
+                            <span style="color: var(--text-light); font-size: 0.85rem;">-</span>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="btn-container">
+        <button type="button" class="btn-add" onclick="addTableRow()">➕ Add More Experience</button>
+    </div>
+</section> 
+
+<!-- Include template tag for initial form schema context layout safely inside custom script scope -->
+<div id="empty-form-template" style="display: none;">
+    <table>
+        <tbody>
+            <tr>
+                <td>{{ formset.empty_form.position }}</td>
+                <td>{{ formset.empty_form.company_name }}</td>
+                <td>{{ formset.empty_form.start_date }}</td>
+                <td>{{ formset.empty_form.end_date }}</td>
+                <td style="text-align: center; vertical-align: middle;">
+                    <button type="button" class="btn-remove" onclick="removeTableRow(this)">Delete</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</section>                 
+
+            <h2>📤 Required File attachments </h2>
+            <hr style="height: 5px; border-width: 0; background-color: blue;">
+
+            <button type="submit" class="btn">💾 Preview & Submit</button>
+        </form>
+</section>
+
+{% endblock %}
+
+<script>
+    function addTableRow() {
+        const tbody = document.getElementById('experience-table-body');
+        const totalForms = document.getElementById('id_workexperience_set-TOTAL_FORMS');
+        const currentCount = parseInt(totalForms.value);
+        
+        // Grab the Django unindexed pristine row template element
+        const templateHtml = document.getElementById('empty-form-template').getElementsByTagName('tr')[0].innerHTML;
+        
+        // Globally replace dynamic '__prefix__' placeholders with correct chronological indices
+        const indexedHtml = templateHtml.replace(/__prefix__/g, currentCount);
+        
+        const row = document.createElement('tr');
+        row.className = 'formset-row';
+        row.innerHTML = indexedHtml;
+        
+        tbody.appendChild(row);
+        
+        // Increment structural forms registration state management parameter
+        totalForms.value = currentCount + 1;
+    }
+
+    function removeTableRow(button) {
+        const row = button.closest('tr');
+        const totalForms = document.getElementById('id_workexperience_set-TOTAL_FORMS');
+        
+        // Check if row contains a structural check field for an already saved instance 
+        const deleteCheckbox = row.querySelector('input[type="checkbox"][name$="-DELETE"]');
+        
+        if (deleteCheckbox) {
+            // Mark existing server data point for elimination on next submission loop execution
+            deleteCheckbox.checked = true;
+            row.style.display = 'none';
+        } else {
+            // Fresh dynamic row, wipe clean from screen space immediately
+            row.remove();
+            const currentCount = parseInt(totalForms.value);
+            totalForms.value = currentCount - 1;
+        }
+    }
+</script>

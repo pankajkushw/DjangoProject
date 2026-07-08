@@ -9,6 +9,11 @@ from django.contrib.auth.hashers import make_password
 from datetime import datetime, timezone
 from accounts.common.tasks import send_email
 from django.contrib.auth import get_user_model
+from django.views import View
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db import transaction
+from .forms import CandidateDetailsForm, WorkExperienceFormSet
+
 
 # Create your views here.
 def home(request: HttpRequest):
@@ -144,16 +149,49 @@ def verify_password_reset_link(request: HttpRequest):
     else:
         return render(request, "set_new_password_using_reset_token.html")
     
-def recurtiment_data_input(request: HttpRequest):
 
-    if request.method == "POST":
-        # Handle form submission and save data to the database
-        # You can access form data using request.POST.get("field_name")
-        # For example:
-        first_name = request.POST.get("first_name")
-        last_name = request.POST.get("last_name")
-        # Save the data to the database or perform any other necessary actions
-        messages.success(request, "Data submitted successfully!")
-        return redirect("recurtiment_data_input")  # Redirect to the same page after submission
+class RecruitmentDataInputView(LoginRequiredMixin, View):
+    template_name = 'recurtiment_input.html'
 
-    return render(request, "recurtiment_data_input.html")  # Render the form template for GET requests
+    def get(self, request, *args, **kwargs):
+        # Prefill form if candidate profile already exists, else load empty forms
+        candidate = getattr(request.user, 'candidate_profile', None)
+        
+        form = CandidateDetailsForm(instance=candidate)
+        formset = WorkExperienceFormSet(instance=candidate)
+        
+        return render(request, self.template_name, {
+            'form': form,
+            'formset': formset
+        })
+
+    def post(self, request, *args, **kwargs):
+        candidate = getattr(request.user, 'candidate_profile', None)
+        
+        # Bind incoming POST text elements and multi-part files data structures
+        form = CandidateDetailsForm(request.POST, request.FILES, instance=candidate)
+        formset = WorkExperienceFormSet(request.POST, request.FILES, instance=candidate)
+
+        if form.is_valid() and formset.is_valid():
+            try:
+                # Wrap inside transaction so either everything saves, or nothing saves
+                with transaction.atomic():
+                    # 1. Save candidate metadata profile instance but don't commit to DB yet
+                    candidate_instance = form.save(commit=False)
+                    candidate_instance.user = request.user
+                    candidate_instance.save()
+                    
+                    # 2. Attach the generated parent candidate profile to the experience formset lines
+                    formset.instance = candidate_instance
+                    formset.save()
+                    
+                return redirect('success_dashboard_page') # Replace with your destination route name
+            
+            except Exception as e:
+                form.add_error(None, f"An unexpected system failure occurred: {str(e)}")
+
+        # Explicitly return template view with validation states if constraints failed (Resolves the None error)
+        return render(request, self.template_name, {
+            'form': form,
+            'formset': formset
+        })
