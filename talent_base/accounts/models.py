@@ -1,8 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
+from django.conf import settings
 from .manager import CustomUserManager
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from accounts.common.models import BaseModel
+from django.core.validators import MinValueValidator, MaxValueValidator
 import uuid
 # Create your models here.
 
@@ -59,11 +61,6 @@ class Token(models.Model):
             return False
         return True
     
-from django.db import models
-from django.contrib.auth.models import User
-from django.core.validators import MinValueValidator, MaxValueValidator
-from django.core.exceptions import ValidationError
-from datetime import date
 
 # Base abstract model assuming you have a custom BaseModel handling created_at/updated_at
 class BaseModel(models.Model):
@@ -81,8 +78,8 @@ class CandidateDetails(BaseModel):
         ('SC', 'Scheduled Caste'),
         ('ST', 'Scheduled Tribe'),
     ]
-
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='candidate_profile')
+    registration_number = models.CharField(max_length=100, unique=True, auto_created=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     
     # Kept if separate from auth user names, otherwise remove and use user.first_name
     first_name = models.CharField(max_length=255)
@@ -115,10 +112,12 @@ class EducationDetails(BaseModel):
     university = models.CharField(max_length=255)
     
     # Safe validation bounds for graduation year
-    year_of_passing = models.PositiveIntegerField(
-        validators=[MinValueValidator(1950), MaxValueValidator(date.today().year + 5)]
+    year_completed = models.PositiveIntegerField(
+        validators=[
+            MinValueValidator(1950), 
+            MaxValueValidator(date.today().year + 5)
+        ]
     )
-    
     marks_obtained = models.FloatField()
     total_marks = models.FloatField()
     percentage = models.FloatField(editable=False) # Auto-calculated, protected from tampering
