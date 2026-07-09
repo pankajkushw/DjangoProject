@@ -55,7 +55,7 @@ class Token(models.Model):
     def is_valid(self) -> bool:
         lifespan_in_seconds = 20 * 60
         now = datetime.now(timezone.utc)
-        timediff = now - self.craeted_at
+        timediff = now - self.created_at
         timediff = timediff.total_seconds()
         if timediff > lifespan_in_seconds:
             return False

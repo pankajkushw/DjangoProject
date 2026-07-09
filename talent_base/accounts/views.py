@@ -114,42 +114,68 @@ def send_password_reset_link(request: HttpRequest):
                     "created_at": datetime.now(timezone.utc),
                 }
             )
+            domain = request.get_host()
             email_data = {
                 "email": email.lower(),
-                "token": token.token
+                "token": token.token,
+                "reset_link": f"http://{domain}/auth/verify_password_reset_link/{email.lower()}/{token.token}/"
             }
+            messages.info(request, "Sending password reset link to your email... { token: " + token.token + " }")
             send_email(
                 "Your password reset link",
                 [email],
                 "emails/password_reset_template.html",
                 email_data
             )
-            messages.success(request, "reset link sent to your email.")
-            return redirect(request, "reset_password_via_email")
-            
+            messages.success(request, "reset link sent to your email, please check your inbox and spam folder.")
+            return redirect("login")  # Redirect to the login page after sending the email
         else:
-            messages.error(request, "email not found")
-            return redirect("reset_password_via_email")
-
+            messages.error(request, "email not found, please register first.")
+            return redirect("register")
     else:
         return render(request, "forgot_password.html")
     
-def verify_password_reset_link(request: HttpRequest):
+def verify_password_reset_link(request: HttpRequest, email: str, reset_token: str):
+    # 1. Strip the junk characters added by terminal mail wrapping
+    if email:
+        email = email.strip().replace("3D", "").rstrip("=")
+    if reset_token:
+        reset_token = reset_token.strip().replace("3D", "").rstrip("/")
 
-    email = request.GET.get("email")
-    reset_token = request.GET.get("token")
-
+    # 2. Run the database lookup with the cleaned email variable
     token = Token.objects.filter(
-        user_email = email, token=reset_token, token_type=TokenType.PASSWORD_RESET
-    ).first()
+        user__email = email, 
+        token=reset_token, 
+        token_type=TokenType.PASSWORD_RESET
+    ).first() 
 
+    # 3. Handle invalid or expired token cases gracefully
     if not token or not token.is_valid():
-        messages.error(request, "Invalid or expired reset link")
-        return redirect("reset_password_via_email")
-    else:
-        return render(request, "set_new_password_using_reset_token.html")
-    
+            messages.error(request, "Invalid or expired reset link")
+            return redirect("send_password_reset_link")
+    else: 
+        if request.method == "POST":
+            messages.info(request, "Processing password reset request...")
+            new_password = request.POST.get("new_password")
+            confirm_password = request.POST.get("confirm_password")
 
+            if new_password != confirm_password:
+                messages.error(request, "Passwords do not match")
+                return render(request, "verify_password_reset_link.html", context={"email": email, "token": reset_token})
+
+            # Save configuration modifications
+            user = token.user
+            user.set_password(new_password)
+            user.save()
+            token.delete() # Burn token after single use
+            
+            messages.success(request, "Password reset successful. Please login with your new password.")
+            return redirect("login")
+
+    # 5. CRITICAL FIX: Explicitly render the page form on a standard GET request!
+    return render(request, "verify_password_reset_link.html", context={"email": email, "token": reset_token})
+
+        
 class RecruitmentDataInputView(LoginRequiredMixin, View):
     template_name = 'recurtiment_input.html'
 
