@@ -12,6 +12,7 @@ from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
 from .forms import CandidateDetailsForm, WorkExperienceFormSet
+import quopri
 
 
 # Create your views here.
@@ -135,45 +136,68 @@ def send_password_reset_link(request: HttpRequest):
         return render(request, "forgot_password.html")
     
 def verify_password_reset_link(request: HttpRequest, email: str, reset_token: str):
-    # 1. Strip the junk characters added by terminal mail wrapping
+    # 1. Safely decode Quoted-Printable terminal wrapping
     if email:
-        email = email.strip().replace("3D", "").rstrip("=")
+        try:
+            email = quopri.decodestring(email.encode("utf-8")).decode("utf-8")
+            email = email.strip()
+        except Exception:
+            pass
+
     if reset_token:
-        reset_token = reset_token.strip().replace("3D", "").rstrip("/")
+        try:
+            reset_token = quopri.decodestring(reset_token.encode("utf-8")).decode(
+                "utf-8"
+            )
+            reset_token = reset_token.strip().rstrip("/")
+        except Exception:
+            pass
 
-    # 2. Run the database lookup with the cleaned email variable
+    # 2. Run the database lookup
     token = Token.objects.filter(
-        user__email = email, 
-        token=reset_token, 
-        token_type=TokenType.PASSWORD_RESET
-    ).first() 
+        user__email=email, token=reset_token, token_type=TokenType.PASSWORD_RESET
+    ).first()
 
-    # 3. Handle invalid or expired token cases gracefully
+    # 3. Handle invalid or expired token cases
     if not token or not token.is_valid():
-            messages.error(request, "Invalid or expired reset link")
-            return redirect("send_password_reset_link")
-    else: 
-        if request.method == "POST":
-            messages.info(request, "Processing password reset request...")
-            new_password = request.POST.get("new_password")
-            confirm_password = request.POST.get("confirm_password")
+        messages.error(request, "Invalid or expired reset link")
+        return redirect("send_password_reset_link")
 
-            if new_password != confirm_password:
-                messages.error(request, "Passwords do not match")
-                return render(request, "verify_password_reset_link.html", context={"email": email, "token": reset_token})
+    # 4. Handle Password Update (POST)
+    if request.method == "POST":
+        new_password = request.POST.get("new_password")
+        confirm_password = request.POST.get("confirm_password")
 
-            # Save configuration modifications
-            user = token.user
-            user.set_password(new_password)
-            user.save()
-            token.delete() # Burn token after single use
-            
-            messages.success(request, "Password reset successful. Please login with your new password.")
-            return redirect("login")
+        if new_password != confirm_password:
+            messages.error(request, "Passwords do not match")
+            # Always pass the CLEANED variables back to the template
+            return render(
+                request,
+                "verify_password_reset_link.html",
+                context={"email": email, "token": reset_token},
+            )
 
-    # 5. CRITICAL FIX: Explicitly render the page form on a standard GET request!
-    return render(request, "verify_password_reset_link.html", context={"email": email, "token": reset_token})
+        # TODO: Add password strength validation here (e.g., length check)
 
+        # Save new password safely
+        user = token.user
+        user.set_password(new_password)
+        user.save()
+
+        # Burn token after single use
+        token.delete()
+
+        messages.success(
+            request, "Password reset successful. Please login with your new password."
+        )
+        return redirect("login")
+
+    # 5. Render the page form on a standard GET request
+    return render(
+        request,
+        "verify_password_reset_link.html",
+        context={"email": email, "token": reset_token},
+    )
         
 class RecruitmentDataInputView(LoginRequiredMixin, View):
     template_name = 'recurtiment_input.html'
