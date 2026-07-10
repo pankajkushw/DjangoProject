@@ -13,6 +13,9 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
 from .forms import CandidateDetailsForm, WorkExperienceFormSet
 import quopri
+from django.contrib.auth.decorators import login_required
+from django.db import transaction
+from .forms import CandidateDetailsForm, EducationFormSet, WorkExperienceFormSet
 
 
 # Create your views here.
@@ -198,49 +201,41 @@ def verify_password_reset_link(request: HttpRequest, email: str, reset_token: st
         "verify_password_reset_link.html",
         context={"email": email, "token": reset_token},
     )
-        
-class RecruitmentDataInputView(LoginRequiredMixin, View):
-    template_name = 'recurtiment_input.html'
 
-    def get(self, request, *args, **kwargs):
-        # Prefill form if candidate profile already exists, else load empty forms
-        candidate = getattr(request.user, 'candidate_profile', None)
+@login_required
+def create_candidate_profile_view(request):
+    if request.method == 'POST':
+        # 1. Bind POST data to ALL forms immediately
+        candidate_form = CandidateDetailsForm(request.POST, request.FILES)
+        education_formset = EducationFormSet(request.POST, request.FILES)
+        experience_formset = WorkExperienceFormSet(request.POST, request.FILES)
         
-        form = CandidateDetailsForm(instance=candidate)
-        formset = WorkExperienceFormSet(instance=candidate)
-        
-        return render(request, self.template_name, {
-            'form': form,
-            'formset': formset
-        })
-
-    def post(self, request, *args, **kwargs):
-        candidate = getattr(request.user, 'candidate_profile', None)
-        
-        # Bind incoming POST text elements and multi-part files data structures
-        form = CandidateDetailsForm(request.POST, request.FILES, instance=candidate)
-        formset = WorkExperienceFormSet(request.POST, request.FILES, instance=candidate)
-
-        if form.is_valid() and formset.is_valid():
-            try:
-                # Wrap inside transaction so either everything saves, or nothing saves
-                with transaction.atomic():
-                    # 1. Save candidate metadata profile instance but don't commit to DB yet
-                    candidate_instance = form.save(commit=False)
-                    candidate_instance.user = request.user
-                    candidate_instance.save()
-                    
-                    # 2. Attach the generated parent candidate profile to the experience formset lines
-                    formset.instance = candidate_instance
-                    formset.save()
-                    
-                return redirect('success_dashboard_page') # Replace with your destination route name
+        # 2. Check validity of ALL forms together
+        if candidate_form.is_valid() and education_formset.is_valid() and experience_formset.is_valid():
+            candidate = candidate_form.save(commit=False)
+            candidate.user = request.user
             
-            except Exception as e:
-                form.add_error(None, f"An unexpected system failure occurred: {str(e)}")
+            # Re-bind instance to formsets before saving so foreign keys align
+            education_formset.instance = candidate
+            experience_formset.instance = candidate
+            
+            with transaction.atomic():
+                candidate.save()
+                education_formset.save()
+                experience_formset.save()
+            return redirect('profile_success_url')
+            
+    else:
+        # GET request: Initialize clean, empty instances
+        candidate_form = CandidateDetailsForm()
+        education_formset = EducationFormSet()
+        experience_formset = WorkExperienceFormSet()
 
-        # Explicitly return template view with validation states if constraints failed (Resolves the None error)
-        return render(request, self.template_name, {
-            'form': form,
-            'formset': formset
-        })
+    # If any form was invalid, execution falls through here safely.
+    # All variables are guaranteed to exist, and they will contain error messages.
+    context = {
+        'candidate_form': candidate_form,
+        'education_formset': education_formset,
+        'experience_formset': experience_formset,
+    }
+    return render(request, 'recurtiment_input.html', context)
