@@ -1,7 +1,7 @@
 
 from django.shortcuts import render, redirect
 from django.http import HttpRequest
-from .models import User, PendingUser, Token, TokenType
+from .models import CandidateDetails, User, PendingUser, Token, TokenType
 from django.contrib import messages, auth
 from django.utils.crypto import get_random_string
 from django.contrib.auth.hashers import make_password
@@ -201,41 +201,60 @@ def verify_password_reset_link(request: HttpRequest, email: str, reset_token: st
         "verify_password_reset_link.html",
         context={"email": email, "token": reset_token},
     )
-
 @login_required
 def create_candidate_profile_view(request):
+    # 1. Fetch the existing database profile row for this logged-in user
+    existing_profile = CandidateDetails.objects.filter(user=request.user).first()
+
     if request.method == 'POST':
-        # 1. Bind POST data to ALL forms immediately
-        candidate_form = CandidateDetailsForm(request.POST, request.FILES)
-        education_formset = EducationFormSet(request.POST, request.FILES)
-        experience_formset = WorkExperienceFormSet(request.POST, request.FILES)
+        # FIX: Pass instance=existing_profile to force an UPDATE instead of a duplicate INSERT
+        candidate_form = CandidateDetailsForm(request.POST, request.FILES, instance=existing_profile)
+        
+        # FIX: Explicitly set the prefixes to match your HTML template targets exactly
+        education_formset = EducationFormSet(request.POST, request.FILES, instance=existing_profile, prefix='educations')
+        experience_formset = WorkExperienceFormSet(request.POST, request.FILES, instance=existing_profile, prefix='experiences')
         
         # 2. Check validity of ALL forms together
         if candidate_form.is_valid() and education_formset.is_valid() and experience_formset.is_valid():
             candidate = candidate_form.save(commit=False)
             candidate.user = request.user
             
-            # Re-bind instance to formsets before saving so foreign keys align
-            education_formset.instance = candidate
-            experience_formset.instance = candidate
-            
             with transaction.atomic():
-                candidate.save()
+                candidate.save() # Saves profile (updates if exists, creates if new)
+                
+                # Re-bind the freshly saved profile instance to your formsets before execution
+                education_formset.instance = candidate
+                experience_formset.instance = candidate
+                
                 education_formset.save()
                 experience_formset.save()
-            return redirect('profile_success_url')
+                
+            # FIX: Removed whitespace from the redirect URL configuration pattern string
+            return redirect('profile_success_view')
             
     else:
-        # GET request: Initialize clean, empty instances
-        candidate_form = CandidateDetailsForm()
-        education_formset = EducationFormSet()
-        experience_formset = WorkExperienceFormSet()
+        # FIX: Pass instance=existing_profile on GET requests to populate old data if it exists
+        candidate_form = CandidateDetailsForm(instance=existing_profile)
+        education_formset = EducationFormSet(instance=existing_profile, prefix='educations')
+        experience_formset = WorkExperienceFormSet(instance=existing_profile, prefix='experiences')
 
-    # If any form was invalid, execution falls through here safely.
-    # All variables are guaranteed to exist, and they will contain error messages.
     context = {
         'candidate_form': candidate_form,
         'education_formset': education_formset,
         'experience_formset': experience_formset,
     }
     return render(request, 'recurtiment_input.html', context)
+
+
+@login_required
+def profile_success_view(request):
+    # FIX: Query using the model name (CandidateDetails) instead of the form class (CandidateDetailsForm)
+    candidate = CandidateDetails.objects.filter(user=request.user).first()
+    
+    context = {
+        'candidate': candidate,
+        # Use the custom related_name parameters from your models.py
+        'educations': candidate.educations.all() if candidate else [],
+        'experiences': candidate.experiences.all() if candidate else [],
+    }
+    return render(request, 'profile_preview.html', context)

@@ -6,6 +6,7 @@ from datetime import date, datetime, timezone
 from accounts.common.models import BaseModel
 from django.core.validators import MinValueValidator, MaxValueValidator
 import uuid
+from django.core.exceptions import ValidationError
 # Create your models here.
 
 # accounts/models.py
@@ -63,13 +64,6 @@ class Token(models.Model):
     
 
 # Base abstract model assuming you have a custom BaseModel handling created_at/updated_at
-class BaseModel(models.Model):
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        abstract = True
-
 
 class CandidateDetails(BaseModel):
     CATEGORY_CHOICES = [
@@ -102,7 +96,7 @@ class CandidateDetails(BaseModel):
     zip_code = models.CharField(max_length=20)
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name} ({self.user.username})"
+        return f"{self.first_name} {self.last_name} ({self.user.email})"
 
 
 class EducationDetails(BaseModel):

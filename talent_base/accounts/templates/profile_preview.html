@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Include Bootstrap 5 CSS via CDN -->
+<link href="https://jsdelivr.net" rel="stylesheet">
+<!-- Include Bootstrap Icons for visual clean design markers -->
+<link href="https://jsdelivr.net" rel="stylesheet">
+
+<div class="container my-5" style="max-width: 900px;">
+    
+    <!-- Success Alert Badge -->
+    <div class="alert alert-success d-flex align-items-center mb-4 rounded-3 shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+        <div>
+            <strong>Application Saved Successfully!</strong> Please review your submission profile details below.
+        </div>
+    </div>
+
+    <div class="card shadow-lg border-0 rounded-4 overflow-hidden bg-white">
+        <!-- Header Profile Summary Banner -->
+        <div class="card-header bg-gradient bg-dark text-white p-4 p-sm-5 border-0 d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #1e293b, #0f172a);">
+            <div>
+                <span class="badge bg-primary px-3 py-2 rounded-pill mb-2 text-uppercase tracking-wider fw-semibold" style="font-size: 0.75rem;">Candidate Profile</span>
+                <h1 class="h3 fw-bold mb-1">{{ candidate.first_name }} {{ candidate.last_name }}</h1>
+                <p class="mb-0 text-white-50 small"><i class="bi bi-calendar-event me-1"></i> Submitted on {% now "F d, Y" %}</p>
+            </div>
+            <div class="d-none d-sm-block text-end">
+                <i class="bi bi-file-earmark-person text-white-50" style="font-size: 4rem; opacity: 0.3;"></i>
+            </div>
+        </div>
+
+        <div class="card-body p-4 p-sm-5">
+            
+            <!-- SECTION 1: Personal Details Summary -->
+            <section class="mb-5">
+                <div class="border-bottom pb-2 mb-3 d-flex align-items-center">
+                    <i class="bi bi-person-vcard text-primary me-2 fs-4"></i>
+                    <h2 class="h5 fw-bold text-secondary mb-0">Personal Details</h2>
+                </div>
+                <div class="bg-light p-4 rounded-3 border">
+                    <div class="row g-4">
+                        <div class="col-12 col-sm-6">
+                            <span class="text-muted d-block small text-uppercase fw-semibold mb-1">Email Address</span>
+                            <span class="text-dark fw-medium">{{ candidate.email|default:"—" }}</span>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <span class="text-muted d-block small text-uppercase fw-semibold mb-1">Phone Number</span>
+                            <span class="text-dark fw-medium">{{ candidate.phone|default:"—" }}</span>
+                        </div>
+                        <div class="col-12">
+                            <span class="text-muted d-block small text-uppercase fw-semibold mb-1">Residential Address</span>
+                            <span class="text-dark fw-medium">{{ candidate.address|default:"—" }}</span>
+                        </div>
+                        {% if candidate.resume %}
+                        <div class="col-12">
+                            <span class="text-muted d-block small text-uppercase fw-semibold mb-1">Uploaded Resume / Document</span>
+                            <a href="{{ candidate.resume.url }}" target="_blank" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center mt-1">
+                                <i class="bi bi-file-earmark-arrow-down me-2"></i> View Uploaded File
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </section>
+            
+            <!-- SECTION 2: Educational Background -->
+            <section class="mb-5">
+                <div class="border-bottom pb-2 mb-3 d-flex align-items-center">
+                    <i class="bi bi-mortarboard text-primary me-2 fs-4"></i>
+                    <h2 class="h5 fw-bold text-secondary mb-0">Educational Background</h2>
+                </div>
+                
+                {% if educations %}
+                    <div class="d-flex flex-column gap-3">
+                        {% for edu in educations %}
+                            <div class="p-4 bg-white border rounded-3 shadow-sm position-relative border-start border-primary border-3">
+                                <div class="row g-3">
+                                    <div class="col-12 col-sm-4">
+                                        <span class="text-muted d-block small text-uppercase fw-semibold">Degree / Certification</span>
+                                        <strong class="text-dark">{{ edu.degree }}</strong>
+                                    </div>
+                                    <div class="col-12 col-sm-5">
+                                        <span class="text-muted d-block small text-uppercase fw-semibold">Institution / School</span>
+                                        <span class="text-dark">{{ edu.institution }}</span>
+                                    </div>
+                                    <div class="col-12 col-sm-3 text-sm-end">
+                                        <span class="text-muted d-block small text-uppercase fw-semibold">Graduation Year</span>
+                                        <span class="badge bg-secondary-subtle text-secondary-emphasis rounded-pill px-3">{{ edu.graduation_year }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted my-3 px-2 small italic"><i class="bi bi-info-circle me-1"></i> No educational qualifications provided.</p>
+                {% endif %}
+            </section>
+            
+            <!-- SECTION 3: Work Experience -->
+            <section class="mb-4">
+                <div class="border-bottom pb-2 mb-3 d-flex align-items-center">
+                    <i class="bi bi-briefcase text-primary me-2 fs-4"></i>
+                    <h2 class="h5 fw-bold text-secondary mb-0">Work Experience</h2>
+                </div>
+                
+                {% if experiences %}
+                    <div class="d-flex flex-column gap-3">
+                        {% for exp in experiences %}
+                            <div class="p-4 bg-white border rounded-3 shadow-sm position-relative border-start border-indigo border-3" style="border-left-color: #6610f2 !important;">
+                                <div class="row g-3">
+                                    <div class="col-12 col-sm-4">
+                                        <span class="text-muted d-block small text-uppercase fw-semibold">Job Title / Designation</span>
+                                        <strong class="text-dark">{{ exp.job_title }}</strong>
+                                    </div>
+                                    <div class="col-12 col-sm-5">
+                                        <span class="text-muted d-block small text-uppercase fw-semibold">Company / Organization</span>
+                                        <span class="text-dark">{{ exp.company_name }}</span>
+                                    </div>
+                                    <div class="col-12 col-sm-3 text-sm-end">
+                                        <span class="text-muted d-block small text-uppercase fw-semibold">Duration</span>
+                                        <span class="text-muted small">{{ exp.start_date }} — {% if exp.is_current %}Present{% else %}{{ exp.end_date }}{% endif %}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted my-3 px-2 small italic"><i class="bi bi-info-circle me-1"></i> No prior professional work history declared.</p>
+                {% endif %}
+            </section>
+        </div>
+
+        <!-- Footer Control Actions -->
+        <div class="card-footer bg-light p-4 d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3 border-top">
+            <a href="{% url 'recurtiment_data_input' %}" class="btn btn-outline-secondary px-4 py-2 w-100 w-sm-auto rounded-3">
+                <i class="bi bi-pencil-square me-2"></i>Edit Information
+            </a>
+            <div class="d-flex gap-2 w-100 w-sm-auto">
+                <button type="button" onclick="window.print();" class="btn btn-outline-dark px-4 py-2 flex-grow-1 flex-sm-grow-0 rounded-3">
+                    <i class="bi bi-printer me-2"></i>Print / Save PDF
+                </button>
+                <a href="/" class="btn btn-primary px-4 py-2 flex-grow-1 flex-sm-grow-0 rounded-3 fw-semibold shadow-sm">
+                    Go to Dashboard <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Print utility overrides to hide layout wrapper actions during physical output saves -->
+<style>
+@media print {
+    body { background-color: #fff !important; }
+    .container { max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
+    .card { border: none !important; shadow: none !important; }
+    .alert, .card-footer, .btn, i { display: none !important; }
+    .card-header { background: #fff !important; color: #000 !important; padding-bottom: 0 !important; }
+    .card-header p, .card-header h1 { color: #000 !important; }
+}
+</style>
+{% endblock %}
