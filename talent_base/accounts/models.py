@@ -28,13 +28,12 @@ class PendingUser(BaseModel):
     email = models.EmailField()
     password = models.CharField(max_length=255)
     verification_code = models.CharField(max_length=255)
-    craeted_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def is_valid(self) -> bool:
         lifespan_in_seconds = 20 * 60
         now = datetime.now(timezone.utc)
-
-        timediff = now - self.craeted_at
+        timediff = now - self.created_at
         timediff = timediff.total_seconds()
         if timediff > lifespan_in_seconds:
             return False
@@ -97,6 +96,9 @@ class CandidateDetails(BaseModel):
 
     def __str__(self):
         return f"{self.first_name} {self.last_name} ({self.user.email})"
+
+
+
 
 
 class EducationDetails(BaseModel):

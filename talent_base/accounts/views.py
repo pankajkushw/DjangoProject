@@ -64,7 +64,7 @@ def register(request: HttpRequest):
                 defaults= {
                     "password":make_password(password),
                     "verification_code": verification_code,
-                    "created_at": datetime.now(timezone.utc)
+                    "created_at": datetime.now(timezone.utc),
                 }
             )
             send_email(
@@ -219,6 +219,10 @@ def create_candidate_profile_view(request):
             candidate = candidate_form.save(commit=False)
             candidate.user = request.user
             
+            if not candidate.registration_number:
+                # Generate a unique registration number if it doesn't exist
+                candidate.registration_number = f"REG-{request.user.id}-{int(datetime.now().timestamp())}"
+
             with transaction.atomic():
                 candidate.save() # Saves profile (updates if exists, creates if new)
                 

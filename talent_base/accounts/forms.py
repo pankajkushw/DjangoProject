@@ -5,18 +5,26 @@ from .models import CandidateDetails, EducationDetails, WorkExperience
 class CandidateDetailsForm(forms.ModelForm):
     class Meta:
         model = CandidateDetails
-        # Exclude system-handled fields like user and registration_number
         exclude = ['user', 'registration_number']
+        widgets = {
+            # Injects native calendar option in the candidate personal details block
+            'date_of_birth': forms.DateInput(attrs={'type': 'date'}),
+        }
 
 class EducationDetailsForm(forms.ModelForm):
     class Meta:
         model = EducationDetails
-        exclude = ['candidate', 'percentage'] # percentage is auto-calculated in save()
+        exclude = ['candidate', 'percentage']
 
 class WorkExperienceForm(forms.ModelForm):
     class Meta:
         model = WorkExperience
         exclude = ['candidate']
+        widgets = {
+            # Injects native calendars inside the dynamic row layout elements
+            'start_date': forms.DateInput(attrs={'type': 'date'}),
+            'end_date': forms.DateInput(attrs={'type': 'date'}),
+        }
 
 # --- Inline Formsets for Multiple Dynamic Rows ---
 
@@ -24,8 +32,8 @@ EducationFormSet = inlineformset_factory(
     CandidateDetails, 
     EducationDetails, 
     form=EducationDetailsForm,
-    extra=1,          # Number of blank forms to show initially
-    can_delete=True   # Allows users to check a box to delete rows
+    extra=1,          
+    can_delete=True   
 )
 
 WorkExperienceFormSet = inlineformset_factory(
