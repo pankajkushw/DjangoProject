@@ -11,11 +11,14 @@ from django.contrib.auth import get_user_model
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
-from .forms import CandidateDetailsForm, WorkExperienceFormSet
 import quopri
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
-from .forms import CandidateDetailsForm, EducationFormSet, WorkExperienceFormSet
+from .forms import CandidateRegistrationForm, EducationDetailsForm, WorkExperienceForm
+from formtools.wizard.views import SessionWizardView
+import os
+from django.conf import settings
+from django.core.files.storage import FileSystemStorage
 
 
 # Create your views here.
@@ -201,54 +204,6 @@ def verify_password_reset_link(request: HttpRequest, email: str, reset_token: st
         "verify_password_reset_link.html",
         context={"email": email, "token": reset_token},
     )
-@login_required
-def create_candidate_profile_view(request):
-    # 1. Fetch the existing database profile row for this logged-in user
-    existing_profile = CandidateDetails.objects.filter(user=request.user).first()
-
-    if request.method == 'POST':
-        # FIX: Pass instance=existing_profile to force an UPDATE instead of a duplicate INSERT
-        candidate_form = CandidateDetailsForm(request.POST, request.FILES, instance=existing_profile)
-        
-        # FIX: Explicitly set the prefixes to match your HTML template targets exactly
-        education_formset = EducationFormSet(request.POST, request.FILES, instance=existing_profile, prefix='educations')
-        experience_formset = WorkExperienceFormSet(request.POST, request.FILES, instance=existing_profile, prefix='experiences')
-        
-        # 2. Check validity of ALL forms together
-        if candidate_form.is_valid() and education_formset.is_valid() and experience_formset.is_valid():
-            candidate = candidate_form.save(commit=False)
-            candidate.user = request.user
-            
-            if not candidate.registration_number:
-                # Generate a unique registration number if it doesn't exist
-                candidate.registration_number = f"REG-{request.user.id}-{int(datetime.now().timestamp())}"
-
-            with transaction.atomic():
-                candidate.save() # Saves profile (updates if exists, creates if new)
-                
-                # Re-bind the freshly saved profile instance to your formsets before execution
-                education_formset.instance = candidate
-                experience_formset.instance = candidate
-                
-                education_formset.save()
-                experience_formset.save()
-                
-            # FIX: Removed whitespace from the redirect URL configuration pattern string
-            return redirect('profile_success_view')
-            
-    else:
-        # FIX: Pass instance=existing_profile on GET requests to populate old data if it exists
-        candidate_form = CandidateDetailsForm(instance=existing_profile)
-        education_formset = EducationFormSet(instance=existing_profile, prefix='educations')
-        experience_formset = WorkExperienceFormSet(instance=existing_profile, prefix='experiences')
-
-    context = {
-        'candidate_form': candidate_form,
-        'education_formset': education_formset,
-        'experience_formset': experience_formset,
-    }
-    return render(request, 'recurtiment_input.html', context)
-
 
 @login_required
 def profile_success_view(request):
@@ -262,3 +217,43 @@ def profile_success_view(request):
         'experiences': candidate.experiences.all() if candidate else [],
     }
     return render(request, 'profile_preview.html', context)
+
+
+class CandidateProfileWizardView(LoginRequiredMixin, SessionWizardView):
+    template_name = 'recurtiment_input.html'
+    form_list = [CandidateRegistrationForm, EducationDetailsForm, WorkExperienceForm]
+    file_storage = FileSystemStorage(location=os.path.join(settings.MEDIA_ROOT, 'temp_uploads'))
+
+    # REMOVE get_form_kwargs completely and replace with this:
+    def get_form_instance(self, step):
+        # Step '0' is your CandidateRegistrationForm (ModelForm)
+        if step == '0':
+            return CandidateDetails.objects.filter(user=self.request.user).first()
+        
+        # Step '1' and '2' are formsets, they handle their instances differently
+        return None
+
+    def done(self, form_list, **kwargs):
+        with transaction.atomic():
+            # Convert form_list generator/tuple to a strict list to read by index safely
+            forms = list(form_list)
+            candidate_form = forms[0]
+            education_formset = forms[1]
+            experience_formset = forms[2]
+
+            candidate = candidate_form.save(commit=False)
+            candidate.user = self.request.user
+            
+            if not candidate.registration_number:
+                candidate.registration_number = f"REG-{self.request.user.id}-{int(datetime.now().timestamp())}"
+            
+            candidate.save()
+
+            # Pass the saved candidate profile to your formset instances
+            education_formset.instance = candidate
+            experience_formset.instance = candidate
+            
+            education_formset.save()
+            experience_formset.save()
+
+        return redirect('profile_success_view')

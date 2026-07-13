@@ -3,192 +3,44 @@
 {% block title %} | Application Portal {% endblock %}
 
 {% block content %}
-<!-- Corrected Bootstrap 5 CDN to fix slow loading hanging issues -->
-<link href="https://jsdelivr.net" rel="stylesheet" crossorigin="anonymous">
 
-<div class="container my-5" style="max-width: 900px;">
-    <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
-        
-        <!-- Header Banner -->
-        <div class="card-header text-white p-4 p-sm-5 border-0" style="background: linear-gradient(135deg, #0d6efd, #0a58ca);">
-            <h1 class="h3 fw-bold mb-2">Application Portal</h1>
-            <p class="mb-0 text-white-50 small">Please fill in your details accurately. Fields marked with certificates require valid uploads.</p>
+<div class="container mt-5">
+  <h2 class="text-center mb-4">Candidate Profile Wizard</h2>
+  <form method="post" action="" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ wizard.management_form }}
+    {% if wizard.form.forms %}
+      {% for form in wizard.form.forms %}
+        <div class="form-step">
+          {{ form.as_p }}
         </div>
+      {% endfor %}
+    {% else %}
+      <div class="form-step">
+        {{ wizard.form.as_p }}
+      </div>
+    {% endif %}
 
-        <!-- Form Element -->
-        <form method="post" enctype="multipart/form-data" class="card-body p-4 p-sm-5">
-            {% csrf_token %}
-            
-            <!-- SECTION 1: Personal Details -->
-            <section class="mb-5">
-                <div class="border-bottom pb-2 mb-4 d-flex align-items-center">
-                    <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary-subtle text-primary fw-bold me-2" style="width: 32px; height: 32px;">1</span>
-                    <h2 class="h5 fw-bold text-dark mb-0">Personal Details</h2>
-                </div>
-                <div class="row row-cols-1 row-cols-sm-2 g-3 django-bootstrap-form">
-                    {{ candidate_form.as_p }}
-                </div>
-            </section>
-            
-            <!-- SECTION 2: Educational Background -->
-            <section class="mb-5">
-                <div class="border-bottom pb-2 mb-4 d-flex justify-content-between align-items-center">
-                    <div class="d-flex align-items-center">
-                        <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary-subtle text-primary fw-bold me-2" style="width: 32px; height: 32px;">2</span>
-                        <h2 class="h5 fw-bold text-dark mb-0">Educational Background</h2>
-                    </div>
-                    <button type="button" id="add-education-btn" class="btn btn-sm btn-outline-primary px-3 rounded-pill">
-                        + Add Education
-                    </button>
-                </div>
-                
-                {{ education_formset.management_form }}
-                <div id="education-formset-container" class="d-flex flex-column gap-3">
-                    {% for form in education_formset %}
-                        <div class="education-form-row p-4 bg-light border rounded-3 position-relative row row-cols-1 row-cols-sm-3 g-3 mx-0 django-bootstrap-form">
-                            {{ form.as_p }}
-                            {% if education_formset.can_delete %}
-                                <div class="col-12 text-end text-danger mt-2 small style-delete-checkbox">{{ form.DELETE }}</div>
-                            {% endif %}
-                        </div>
-                    {% endfor %}
-                </div>
-                
-                <!-- Hidden Template for JavaScript Clones -->
-                <template id="education-template">
-                    <div class="education-form-row p-4 bg-light border rounded-3 position-relative row row-cols-1 row-cols-sm-3 g-3 mx-0 django-bootstrap-form">
-                        {{ education_formset.empty_form.as_p }}
-                    </div>
-                </template>
-            </section>
-            
-            <!-- SECTION 3: Work Experience -->
-            <section class="mb-5">
-                <div class="border-bottom pb-2 mb-4 d-flex justify-content-between align-items-center">
-                    <div class="d-flex align-items-center">
-                        <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary-subtle text-primary fw-bold me-2" style="width: 32px; height: 32px;">3</span>
-                        <h2 class="h5 fw-bold text-dark mb-0">Work Experience</h2>
-                    </div>
-                    <button type="button" id="add-experience-btn" class="btn btn-sm btn-outline-primary px-3 rounded-pill">
-                        + Add Experience
-                    </button>
-                </div>
-                
-                {{ experience_formset.management_form }}
-                <div id="experience-formset-container" class="d-flex flex-column gap-3">
-                    {% for form in experience_formset %}
-                        <div class="experience-form-row p-4 bg-light border rounded-3 position-relative row row-cols-1 row-cols-sm-3 g-3 mx-0 django-bootstrap-form">
-                            {{ form.as_p }}
-                            {% if experience_formset.can_delete %}
-                                <div class="col-12 text-end text-danger mt-2 small style-delete-checkbox">{{ form.DELETE }}</div>
-                            {% endif %}
-                        </div>
-                    {% endfor %}
-                </div>
-                
-                <!-- Hidden Template for JavaScript Clones -->
-                <template id="experience-template">
-                    <div class="experience-form-row p-4 bg-light border rounded-3 position-relative row row-cols-1 row-cols-sm-3 g-3 mx-0 django-bootstrap-form">
-                        {{ experience_formset.empty_form.as_p }}
-                    </div>
-                </template>
-            </section>
-
-            <!-- Action Buttons -->
-            <div class="pt-4 border-top d-flex justify-content-end gap-3">
-                <button type="button" onclick="window.history.back();" class="btn btn-outline-secondary px-4 rounded-3">
-                    Cancel
-                </button>
-                <button type="submit" class="btn btn-primary px-4 rounded-3 fw-semibold shadow-sm">
-                    Submit Application
-                </button>
-            </div>
-        </form>        
+    <div class="form-navigation mt-3">
+      {% if wizard.steps.prev %}
+        <button type="submit" name="wizard_goto_step" value="{{ wizard.steps.prev }}" class="btn btn-secondary">Previous</button>
+      {% endif %}
+      <button type="submit" class="btn btn-primary">{% if wizard.steps.last %}Submit{% else %}Next{% endif %}</button>
     </div>
+  </form>
+
 </div>
 
-<style>
-    /* CSS Optimizations */
-    .django-bootstrap-form p {
-        margin-bottom: 0 !important;
-        display: flex;
-        flex-direction: column;
-    }
-    .django-bootstrap-form p label {
-        font-size: 0.85rem;
-        font-weight: 600;
-        color: #495057;
-        margin-bottom: 0.25rem;
-    }
-    .django-bootstrap-form p input:not([type="checkbox"]):not([type="file"]), 
-    .django-bootstrap-form p select, 
-    .django-bootstrap-form p textarea {
-        display: block;
-        width: 100%;
-        padding: 0.375rem 0.75rem;
-        font-size: 0.9rem;
-        font-weight: 400;
-        line-height: 1.5;
-        color: #212529;
-        background-color: #fff;
-        border: 1px solid #ced4da;
-        border-radius: 0.375rem;
-        transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
-    }
-    .django-bootstrap-form p input:focus, 
-    .django-bootstrap-form p select:focus, 
-    .django-bootstrap-form p textarea:focus {
-        color: #212529;
-        background-color: #fff;
-        border-color: #86b7fe;
-        outline: 0;
-        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-    }
-    .django-bootstrap-form p input[type="file"] {
-        font-size: 0.9rem;
-    }
-    .django-bootstrap-form p input[type="checkbox"] {
-        width: 1rem;
-        height: 1rem;
-        margin-top: 0.25rem;
-        border-radius: 0.25rem;
-        border: 1px solid #ced4da;
-    }
-    .style-delete-checkbox p {
-        flex-direction: row-reverse !important;
-        justify-content: flex-end;
-        gap: 0.5rem;
-        align-items: center;
-    }
-</style>
 
-<script>
-// Completed and optimized dynamic formset logic
-function setupFormset(prefix, containerId, buttonId, templateId) {
-    const container = document.getElementById(containerId);
-    const addButton = document.getElementById(buttonId);
-    const template = document.getElementById(templateId);
-    const totalFormsInput = document.querySelector(`input[name="${prefix}-TOTAL_FORMS"]`);
 
-    if (!addButton || !container || !template || !totalFormsInput) return;
 
-    addButton.addEventListener('click', () => {
-        const currentFormCount = parseInt(totalFormsInput.value, 10);
-        const htmlContent = template.innerHTML.replace(/__prefix__/g, currentFormCount);
-        
-        const parser = new DOMParser();
-        const parsedDoc = parser.parseFromString(htmlContent, 'text/html');
-        const newFormRow = parsedDoc.body.firstChild;
 
-        container.appendChild(newFormRow);
-        totalFormsInput.value = currentFormCount + 1;
-    });
-}
 
-// Initialise forms safely after DOM loads
-document.addEventListener('DOMContentLoaded', () => {
-    setupFormset('education_formset', 'education-formset-container', 'add-education-btn', 'education-template');
-    setupFormset('experience_formset', 'experience-formset-container', 'add-experience-btn', 'experience-template');
-});
-</script>
+
+
+
+
+
+
+
 {% endblock %}

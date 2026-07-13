@@ -2,14 +2,12 @@ from django import forms
 from django.forms import inlineformset_factory
 from .models import CandidateDetails, EducationDetails, WorkExperience
 
-class CandidateDetailsForm(forms.ModelForm):
+
+class CandidateRegistrationForm(forms.ModelForm):
     class Meta:
         model = CandidateDetails
-        exclude = ['user', 'registration_number']
-        widgets = {
-            # Injects native calendar option in the candidate personal details block
-            'date_of_birth': forms.DateInput(attrs={'type': 'date'}),
-        }
+        fields = ['first_name', 'last_name', 'user', 'date_of_birth', 'phone_number', 'address', 'city', 'state', 'country', 'zip_code']
+
 
 class EducationDetailsForm(forms.ModelForm):
     class Meta:
@@ -21,17 +19,15 @@ class WorkExperienceForm(forms.ModelForm):
         model = WorkExperience
         exclude = ['candidate']
         widgets = {
-            # Injects native calendars inside the dynamic row layout elements
             'start_date': forms.DateInput(attrs={'type': 'date'}),
             'end_date': forms.DateInput(attrs={'type': 'date'}),
         }
 
-# --- Inline Formsets for Multiple Dynamic Rows ---
-
+# 2. Define Formsets AFTER the forms they use are defined
 EducationFormSet = inlineformset_factory(
     CandidateDetails, 
     EducationDetails, 
-    form=EducationDetailsForm,
+    form=EducationDetailsForm, # This now works
     extra=1,          
     can_delete=True   
 )
@@ -39,7 +35,8 @@ EducationFormSet = inlineformset_factory(
 WorkExperienceFormSet = inlineformset_factory(
     CandidateDetails, 
     WorkExperience, 
-    form=WorkExperienceForm,
+    form=WorkExperienceForm, # This now works
     extra=1, 
     can_delete=True
 )
+
