@@ -19,7 +19,7 @@ from formtools.wizard.views import SessionWizardView
 import os
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
-
+from django.views.generic import DetailView
 
 # Create your views here.
 def home(request: HttpRequest):
@@ -257,3 +257,20 @@ class CandidateProfileWizardView(LoginRequiredMixin, SessionWizardView):
             experience_formset.save()
 
         return redirect('profile_success_view')
+
+
+class CandidateProfilePreviewView(LoginRequiredMixin, DetailView):
+    model = CandidateDetails
+    template_name = 'profile_preview.html'
+    context_object_name = 'candidate'
+
+    def get_object(self, queryset=None):
+        # Fetches the profile belonging to the logged-in user
+        return CandidateDetails.objects.get(user=self.request.user)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Prefetch related data using the related_name strings from your models
+        context['educations'] = self.object.educations.all().order_by('-year_completed')
+        context['experiences'] = self.object.experiences.all().order_by('-start_date')
+        return context

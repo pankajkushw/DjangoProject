@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.conf import settings
 from .manager import CustomUserManager
-from datetime import date, datetime, timezone
+from datetime import datetime, timezone
 from accounts.common.models import BaseModel
 from django.core.validators import MinValueValidator, MaxValueValidator
 import uuid
@@ -97,8 +97,13 @@ class CandidateDetails(BaseModel):
     def __str__(self):
         return f"{self.first_name} {self.last_name} ({self.user.email})"
 
+    
+def current_year():
+    return datetime.now().year
 
-
+def year_choices():
+# Counts backward from (Current Year + 5) down to 1950
+    return [(r, r) for r in range(current_year(), 1980, -1)]
 
 
 class EducationDetails(BaseModel):
@@ -106,22 +111,23 @@ class EducationDetails(BaseModel):
     degree = models.CharField(max_length=255)
     institution = models.CharField(max_length=255)
     university = models.CharField(max_length=255)
-    
-    # Safe validation bounds for graduation year
     year_completed = models.PositiveIntegerField(
+        choices=year_choices(),
+        default=current_year,  # Removed parentheses () so it evaluates on creation, not migration
         validators=[
-            MinValueValidator(1950), 
-            MaxValueValidator(date.today().year + 5)
+            MinValueValidator(1980),
+            MaxValueValidator(current_year())
         ]
     )
-    marks_obtained = models.FloatField()
-    total_marks = models.FloatField()
-    percentage = models.FloatField(editable=False) # Auto-calculated, protected from tampering
-    grade = models.CharField(max_length=10, blank=True)
+
+    marks_obtained = models.PositiveIntegerField()
+    total_marks = models.PositiveIntegerField()
+    percentage = models.FloatField(editable=False) 
     degree_certificate = models.FileField(upload_to='degree_certificates/', blank=True, null=True)
 
+
     def save(self, *args, **kwargs):
-        # Automated math calculation step
+        # Enforce backend auto-calculation
         if self.total_marks > 0:
             self.percentage = round((self.marks_obtained / self.total_marks) * 100, 2)
         else:
@@ -130,7 +136,6 @@ class EducationDetails(BaseModel):
 
     def __str__(self):
         return f"{self.degree} - {self.institution}"
-
 
 class WorkExperience(BaseModel):
     candidate = models.ForeignKey(CandidateDetails, on_delete=models.CASCADE, related_name='experiences')
@@ -150,7 +155,7 @@ class WorkExperience(BaseModel):
             raise ValidationError({'end_date': "End date cannot be earlier than the start date."})
 
     def save(self, *args, **kwargs):
-        self.full_clean()
+        self.full_clean()  # Forces full validation before saving to the database
         super().save(*args, **kwargs)
 
     def __str__(self):

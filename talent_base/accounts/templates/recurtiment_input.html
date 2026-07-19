@@ -1,46 +1,71 @@
 {% extends 'base.html' %}
+{% load static %}
+{% comment %}
+{% load humanize %}
+{% endcomment %}
 
-{% block title %} | Application Portal {% endblock %}
+{% block title %} Entry Page |  {% endblock %}
 
 {% block content %}
+{% include 'header.html' %}
 
-<div class="container mt-5">
-  <h2 class="text-center mb-4">Candidate Profile Wizard</h2>
-  <form method="post" action="" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ wizard.management_form }}
-    {% if wizard.form.forms %}
-      {% for form in wizard.form.forms %}
-        <div class="form-step">
-          {{ form.as_p }}
+<div class="container my-5">
+  <div class="row justify-content-center">
+    <div class="col-12 col-md-10 col-lg-8">
+      
+      <!-- Hardened fallback card container structure -->
+      <div class="card overflow-hidden" style="border: 2px solid #0d6efd !important;">
+        
+        <!-- Header -->
+        <div class="card-header bg-light py-3 d-flex justify-content-between align-items-center border-bottom border-primary border-opacity-20">
+          <h2 class="h5 mb-0 text-primary fw-bold">Candidate Profile Wizard</h2>
+          <span class="badge bg-primary rounded-pill">
+            Step {{ wizard.steps.step1 }} of {{ wizard.steps.count }}
+          </span>
         </div>
-      {% endfor %}
-    {% else %}
-      <div class="form-step">
-        {{ wizard.form.as_p }}
-      </div>
-    {% endif %}
 
-    <div class="form-navigation mt-3">
-      {% if wizard.steps.prev %}
-        <button type="submit" name="wizard_goto_step" value="{{ wizard.steps.prev }}" class="btn btn-secondary">Previous</button>
-      {% endif %}
-      <button type="submit" class="btn btn-primary">{% if wizard.steps.last %}Submit{% else %}Next{% endif %}</button>
+        <form method="post" action="" enctype="multipart/form-data">
+          {% csrf_token %}
+          {{ wizard.management_form }}
+          
+          <!-- Card Body -->
+          <div class="card-body p-4"> 
+              {% if wizard.form.forms %} 
+                  {% for form in wizard.form.forms %} 
+                      <div class="form-step mb-3 p-3 border rounded"> 
+                          {{ form.as_p }} 
+                      </div> 
+                  {% endfor %} 
+              {% else %} 
+                  <div class="form-step p-3 border rounded"> 
+                      {{ wizard.form.as_p }} 
+                  </div> 
+              {% endif %} 
+          </div>
+
+          <!-- Footer -->
+          <div class="card-footer bg-white p-4 d-flex justify-content-between border-top border-primary border-opacity-20">
+            <div>
+              {% if wizard.steps.prev %}
+                <button type="submit" name="wizard_goto_step" value="{{ wizard.steps.prev }}" class="btn btn-outline-secondary px-4">
+                  Previous
+                </button>
+              {% endif %}
+            </div>
+            
+            <button type="submit" class="btn btn-primary px-4 fw-semibold">
+              {% if wizard.steps.last %}Submit Profile{% else %}Next Step{% endif %}
+            </button>
+          </div>
+
+        </form>
+      </div> <!-- End Card -->
+
     </div>
-  </form>
-
+  </div>
 </div>
 
 
 
-
-
-
-
-
-
-
-
-
-
+{% include 'footer.html' %}
 {% endblock %}
