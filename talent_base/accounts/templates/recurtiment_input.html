@@ -64,8 +64,32 @@
     </div>
   </div>
 </div>
-
-
-
 {% include 'footer.html' %}
+<script>
+    const formContainer = document.getElementById('form-container');
+    const addButton = document.getElementById('add-form-btn');
+    const totalForms = document.getElementById('id_education_details_set-TOTAL_FORMS'); // Check your actual management form ID prefix
+
+    addButton.addEventListener('click', function() {
+        const currentForms = document.getElementsByClassName('education-form-row');
+        const formNum = currentForms.length; // Get current number of forms
+
+        // Clone the first form row
+        const newForm = currentForms[0].cloneNode(true);
+        
+        // Clear input values in the cloned form
+        newForm.querySelectorAll('input, select, textarea').forEach(input => {
+            input.value = '';
+            // Update the index prefix (e.g., education_details_set-0-id to education_details_set-1-id)
+            input.name = input.name.replace(/-0-/, `-${formNum}-`);
+            input.id = input.id.replace(/-0-/, `-${formNum}-`);
+        });
+
+        formContainer.appendChild(newForm);
+        
+        // Increment the total form count for Django
+        totalForms.setAttribute('value', formNum + 1);
+    });
+</script>
+
 {% endblock %}
