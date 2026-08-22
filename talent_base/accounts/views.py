@@ -10,16 +10,9 @@ from accounts.common.tasks import send_email
 from django.contrib.auth import get_user_model
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db import transaction
 import quopri
 from django.contrib.auth.decorators import login_required
-from django.db import transaction
 from .forms import CandidateRegistrationForm, EducationDetailsForm, WorkExperienceForm
-from formtools.wizard.views import SessionWizardView
-import os
-from django.conf import settings
-from django.core.files.storage import FileSystemStorage
-from django.views.generic import DetailView
 
 # Create your views here.
 def home(request: HttpRequest):
@@ -36,7 +29,7 @@ def login(request: HttpRequest):
         if user is not None:
             auth.login(request, user)
             messages.success(request, "Account verified. Welcome to entry page !!")
-            return redirect("recurtiment_data_input") # if successful login, redirect to the recurtiment_data_input page
+            return redirect("recruitment_data_input") # if successful login, redirect to the recurtiment_data_input page
         else: 
             messages.error(request, "Invalid credentials")
             return redirect("login")
@@ -218,59 +211,15 @@ def profile_success_view(request):
     }
     return render(request, 'profile_preview.html', context)
 
-
-class CandidateProfileWizardView(LoginRequiredMixin, SessionWizardView):
-    template_name = 'recurtiment_input.html'
-    form_list = [CandidateRegistrationForm, EducationDetailsForm, WorkExperienceForm]
-    file_storage = FileSystemStorage(location=os.path.join(settings.MEDIA_ROOT, 'temp_uploads'))
-
-    # REMOVE get_form_kwargs completely and replace with this:
-    def get_form_instance(self, step):
-        # Step '0' is your CandidateRegistrationForm (ModelForm)
-        if step == '0':
-            return CandidateDetails.objects.filter(user=self.request.user).first()
-        
-        # Step '1' and '2' are formsets, they handle their instances differently
-        return None
-
-    def done(self, form_list, **kwargs):
-        with transaction.atomic():
-            # Convert form_list generator/tuple to a strict list to read by index safely
-            forms = list(form_list)
-            candidate_form = forms[0]
-            education_formset = forms[1]
-            experience_formset = forms[2]
-
-            candidate = candidate_form.save(commit=False)
-            candidate.user = self.request.user
-            
-            if not candidate.registration_number:
-                candidate.registration_number = f"REG-{self.request.user.id}-{int(datetime.now().timestamp())}"
-            
-            candidate.save()
-
-            # Pass the saved candidate profile to your formset instances
-            education_formset.instance = candidate
-            experience_formset.instance = candidate
-            
-            education_formset.save()
-            experience_formset.save()
-
-        return redirect('profile_success_view')
-
-
-class CandidateProfilePreviewView(LoginRequiredMixin, DetailView):
-    model = CandidateDetails
-    template_name = 'profile_preview.html'
-    context_object_name = 'candidate'
-
-    def get_object(self, queryset=None):
-        # Fetches the profile belonging to the logged-in user
-        return CandidateDetails.objects.get(user=self.request.user)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        # Prefetch related data using the related_name strings from your models
-        context['educations'] = self.object.educations.all().order_by('-year_completed')
-        context['experiences'] = self.object.experiences.all().order_by('-start_date')
-        return context
+def recruitment_data_input(request):
+    print("reaching here", request.method)
+    if request.method == 'POST':
+        print("reaching in if")
+        form = CandidateRegistrationForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('home') # this should return the form preview page and submit
+    else:
+        print("reaching in else")
+        form = CandidateRegistrationForm()
+    return render(request, 'recruitment_input.html', {'form': form})

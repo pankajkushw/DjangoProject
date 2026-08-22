@@ -145,7 +145,6 @@ class WorkExperience(BaseModel):
     
     # Nullable end_date to support "Currently Working Here" states
     end_date = models.DateField(null=True, blank=True) 
-    responsibilities = models.TextField(blank=True)
     experience_certificate = models.FileField(upload_to='experience_certificates/', blank=True, null=True) 
 
     def clean(self):

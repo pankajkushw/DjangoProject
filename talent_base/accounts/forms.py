@@ -3,16 +3,62 @@ from django.forms import inlineformset_factory
 from .models import CandidateDetails, EducationDetails, WorkExperience
 
 
+STATE_CHOICE = (
+    ('Andhra Pradesh', 'Andhra Pradesh'),
+    ('Arunachal Pradesh', 'Arunachal Pradesh'),
+    ('Assam', 'Assam'),
+    ('Bihar', 'Bihar'),
+    ('Chhattisgarh', 'Chhattisgarh'),
+    ('Goa', 'Goa'),
+    ('Gujarat', 'Gujarat'),
+    ('Haryana', 'Haryana'),
+    ('Himachal Pradesh', 'Himachal Pradesh'),
+    ('Jharkhand', 'Jharkhand'),
+    ('Karnataka', 'Karnataka'),
+    ('Kerala', 'Kerala'),
+    ('Madhya Pradesh', 'Madhya Pradesh'),
+    ('Maharashtra', 'Maharashtra'),
+    ('Manipur', 'Manipur'),
+    ('Meghalaya', 'Meghalaya'),
+    ('Mizoram', 'Mizoram'),
+    ('Nagaland', 'Nagaland'),
+    ('Odisha', 'Odisha'),
+    ('Punjab', 'Punjab'),
+    ('Rajasthan', 'Rajasthan'),
+    ('Sikkim', 'Sikkim'),
+    ('Tamil Nadu', 'Tamil Nadu'),
+    ('Telangana', 'Telangana'),
+    ('Tripura', 'Tripura'),
+    ('Uttar Pradesh', 'Uttar Pradesh'),
+    ('Uttarakhand', 'Uttarakhand'),
+)
+
 class CandidateRegistrationForm(forms.ModelForm):
     class Meta:
         model = CandidateDetails
         fields = [
             'first_name', 'last_name', 'user', 'date_of_birth', 
-            'phone_number', 'address', 'city', 'state', 'country', 'zip_code'
-        ]
-        widgets = {
-            'date_of_birth': forms.DateInput(attrs={'type': 'date'}),
+            'phone_number', 'address', 'city', 'state', 'country', 'zip_code']
+
+        labels = {
+            'first_name':'First Name',
+            'last_name': 'Last Name',
+            'user': 'Email',
+            'date_of_birth': 'Date of Birth',
+            'phone_number': 'Phone Number',
+            'address': 'Address',
+            'city': 'City',
+            'state': 'State',
+            'country': 'Country',
+            'zip_code': 'Pin Code'
         }
+        widgets = {
+            'first_name': forms.TextInput(attrs={'class':'form-control'}),
+            'last_name':forms.TextInput(attrs={'class':'form-control'}),
+            'user':forms.EmailInput(attrs={'class':'form-control', 'placeholder':'Email adfrees'}),
+            'date_of_birth': forms.DateInput(attrs={'class': 'form-control', 'id':'datepicker', 'type':'date'})
+        }
+
         
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
