@@ -6,13 +6,13 @@
 {% endblock extra_head %}
 
 {% if user.is_authenticated %}
-  {% block content %}
+
+  {% block center-content %}
   {% include 'header.html' %}
 
 
 
-    <h1 class="text-center">Welcome to recruitment Page.</h1>
-  {% endblock content %}
+  {% endblock center-content %}
 {% endif %}
 
 {% block extra_js %}
