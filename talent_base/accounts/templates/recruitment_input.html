@@ -6,13 +6,44 @@
 {% endblock extra_head %}
 
 {% if user.is_authenticated %}
-
-  {% block center-content %}
+  {% block content %}
   {% include 'header.html' %}
+  <!-- Use a clean container that clears out any accidental parent flex alignments -->
+  <div class="container d-block clear-fix float-none">
+      
+      <!-- BLOCK 1: Force a clean, independent row for the title at 100% width -->
+      <div class="row w-100 m-0 d-block">
+          <div class="col-12 text-center mt-3 mb-4">
+              <h1 class="display-4 font-weight-bold">Mastering Django Form Field</h1>
+          </div>
+      </div>
 
+      <!-- BLOCK 2: Separate Content grid layout entirely -->
+      <div class="row w-100 m-0">
+          
+          <!-- Left Content Column -->
+          <div class="col-md-8 mb-3">
+              <div class="p-3 border bg-light h-100">
+                  {% block left-content %}
+                      <!-- Content will render safely here -->
+                       <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Error dolores, rerum similique placeat quo laborum quidem, quae eum nemo rem doloremque quisquam minima, aperiam earum. Itaque cum aliquam deserunt odio!</p>
+                  {% endblock left-content %}
+              </div>
+          </div>
 
+          <!-- Right Sidebar Column -->
+          <div class="col-md-4 mb-3">
+              <div class="p-3 border bg-light h-100">
+                  {% block right-content %}
+                      <!-- Sidebar content here -->
+                       <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Accusantium, incidunt quibusdam, cupiditate harum sequi quod consequatur, ad assumenda inventore quisquam doloribus animi vel necessitatibus provident expedita soluta sit neque suscipit!</p>
+                  {% endblock right-content %}
+              </div>
+          </div>            
 
-  {% endblock center-content %}
+      </div>
+  </div>
+  {% endblock content %}
 {% endif %}
 
 {% block extra_js %}
