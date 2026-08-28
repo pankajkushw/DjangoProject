@@ -37,13 +37,14 @@ class CandidateRegistrationForm(forms.ModelForm):
     class Meta:
         model = CandidateDetails
         fields = [
-            'first_name', 'last_name', 'user', 'date_of_birth', 
+            'first_name', 'last_name', 'father_name', 'mother_name', 'date_of_birth', 
             'phone_number', 'address', 'city', 'state', 'country', 'zip_code']
 
         labels = {
             'first_name':'First Name',
             'last_name': 'Last Name',
-            'user': 'Email',
+            'father_name': 'Father Name',
+            'mother_name': 'Mother Name',
             'date_of_birth': 'Date of Birth',
             'phone_number': 'Phone Number',
             'address': 'Address',
@@ -55,16 +56,13 @@ class CandidateRegistrationForm(forms.ModelForm):
         widgets = {
             'first_name': forms.TextInput(attrs={'class':'form-control'}),
             'last_name':forms.TextInput(attrs={'class':'form-control'}),
-            'user':forms.EmailInput(attrs={'class':'form-control', 'placeholder':'Email adfrees'}),
-            'date_of_birth': forms.DateInput(attrs={'class': 'form-control', 'id':'datepicker', 'type':'date'})
+            'father_name':forms.TextInput(attrs={'class':'form-control'}),
+            'mother_name':forms.TextInput(attrs={'class':'form-control'}),
+            'date_of_birth': forms.DateInput(attrs={'class': 'form-control', 'id':'datepicker', 'type':'date'}),
+            
         }
 
         
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Apply Bootstrap styling to all fields
-        for field_name, field in self.fields.items():
-            field.widget.attrs.update({'class': 'form-control'})
 
 class EducationDetailsForm(forms.ModelForm):
     class Meta:

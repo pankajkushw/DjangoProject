@@ -14,19 +14,93 @@
       <!-- BLOCK 1: Force a clean, independent row for the title at 100% width -->
       <div class="row w-100 m-0 d-block">
           <div class="col-12 text-center mt-3 mb-4">
-              <h1 class="display-4 font-weight-bold">Mastering Django Form Field</h1>
+              <h1 class="display-4 font-weight-bold">Candidates Bio Data</h1>
           </div>
       </div>
 
       <!-- BLOCK 2: Separate Content grid layout entirely -->
       <div class="row w-100 m-0">
-          
           <!-- Left Content Column -->
           <div class="col-md-8 mb-3">
               <div class="p-3 border bg-light h-100">
                   {% block left-content %}
                       <!-- Content will render safely here -->
-                       <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Error dolores, rerum similique placeat quo laborum quidem, quae eum nemo rem doloremque quisquam minima, aperiam earum. Itaque cum aliquam deserunt odio!</p>
+                       <form action="" method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            {% if form.non_field_errors %}
+                                {% for error in form.non_field_errors %}
+                                    <p class="alert alert-danger my-3">{{ error }}</p>
+                                {% endfor %}
+                            {% endif %}
+                            <div class="mb-3">
+                                <label for="{{ form.first_name.label }}" class ="form-label">{{ form.first_name.label }}</label>
+                                {{ form.first_name }}
+                                {% if form.first_name.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.first_name.errors %}
+                                            <p>{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="mb-3">
+                                <label for="{{ form.last_name.label }}" class ="form-label">{{ form.last_name.label }}</label>
+                                {{ form.last_name }}
+                                {% if form.last_name.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.last_name.errors %}
+                                            <p>{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="mb-3">
+                                <label for="{{ form.father_name.label }}" class ="form-label">{{ form.father_name.label }}</label>
+                                {{ form.father_name }}
+                                {% if form.father_name.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.father_name.errors %}
+                                            <p>{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="mb-3">
+                                <label for="{{ form.mother_name.label }}" class ="form-label">{{ form.mother_name.label }}</label>
+                                {{ form.mother_name }}
+                                {% if form.mother_name.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.mother_name.errors %}
+                                            <p>{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="mb-3">
+                                <label for="{{ form.date_of_birth.label }}" class ="form-label">{{ form.date_of_birth.label }}</label>
+                                {{ form.date_of_birth }}
+                                {% if form.date_of_birth.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.date_of_birth.errors %}
+                                            <p>{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="mb-3">
+                                <label for="{{ form.gender.label }}" class ="form-label">{{ form.gender.label }}</label>
+                                {{ form.gender }}
+                                {% if form.gender.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.gender.errors %}
+                                            <p>{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+
+                       </form>
                   {% endblock left-content %}
               </div>
           </div>

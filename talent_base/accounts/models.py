@@ -73,7 +73,6 @@ class CandidateDetails(BaseModel):
     ]
     registration_number = models.CharField(max_length=100, unique=True, auto_created=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    
     # Kept if separate from auth user names, otherwise remove and use user.first_name
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
@@ -95,8 +94,8 @@ class CandidateDetails(BaseModel):
     zip_code = models.CharField(max_length=20)
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name} ({self.user.email})"
-
+        return f"{self.first_name} {self.last_name} ({self.email}"
+    
     
 def current_year():
     return datetime.now().year
