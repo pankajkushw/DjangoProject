@@ -88,16 +88,62 @@
                                 {% endif %}
                             </div>
                             <div class="mb-3">
-                                <label for="{{ form.gender.label }}" class ="form-label">{{ form.gender.label }}</label>
-                                {{ form.gender }}
-                                {% if form.gender.errors %}
+                                <label for="{{ form.phone_number.label }}" class ="form-label">{{ form.phone_number.label }}</label>
+                                {{ form.phone_number }}
+                                {% if form.phone_number.errors %}
                                     <div class="text-danger">
-                                        {% for error in form.gender.errors %}
+                                        {% for error in form.phone_number.errors %}
                                             <p>{{ error }}</p>
                                         {% endfor %}
                                     </div>
                                 {% endif %}
                             </div>
+                            <div class="mb-3">
+                                <label for="{{ form.address.label }}" class ="form-label">{{ form.address.label }}</label>
+                                {{ form.address }}
+                                {% if form.address.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.address.errors %}
+                                            <p>{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="mb-3">
+                                <label for="{{ form.city.label }}" class ="form-label">{{ form.city.label }}</label>
+                                {{ form.city }}
+                                {% if form.city.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.city.errors %}
+                                            <p>{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                           <div class="mb-3">
+                                <label for="{{ form.state.label }}" class ="form-label">{{ form.state.label }}</label>
+                                {{ form.state }}
+                                {% if form.state.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.state.errors %}
+                                            <p>{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                           <div class="mb-3">
+                                <label for="{{ form.zip_code.label }}" class ="form-label">{{ form.zip_code.label }}</label>
+                                {{ form.zip_code }}
+                                {% if form.zip_code.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.zip_code.errors %}
+                                            <p>{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+
 
 
                        </form>

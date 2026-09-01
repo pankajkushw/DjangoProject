@@ -59,6 +59,12 @@ class CandidateRegistrationForm(forms.ModelForm):
             'father_name':forms.TextInput(attrs={'class':'form-control'}),
             'mother_name':forms.TextInput(attrs={'class':'form-control'}),
             'date_of_birth': forms.DateInput(attrs={'class': 'form-control', 'id':'datepicker', 'type':'date'}),
+            'phone_number':forms.TextInput(attrs={'class':'form-control'}),
+            'address':forms.Textarea(attrs={'class':'form-control', 'rows':3}),
+            'city':forms.TextInput(attrs={'class':'form-control'}),
+            'state':forms.Select(choices=STATE_CHOICE, attrs={'class':'form-control'}),
+            'country':forms.TextInput(attrs={'class':'form-control'}),
+            'zip_code':forms.TextInput(attrs={'class':'form-control'}),
             
         }
 
