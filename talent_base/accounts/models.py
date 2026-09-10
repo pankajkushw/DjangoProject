@@ -63,7 +63,6 @@ class Token(models.Model):
     
 
 # Base abstract model assuming you have a custom BaseModel handling created_at/updated_at
-
 class CandidateDetails(BaseModel):
     CATEGORY_CHOICES = [
         ('General', 'General'),
@@ -87,6 +86,7 @@ class CandidateDetails(BaseModel):
     category_certificate = models.FileField(upload_to='category_certificates/', blank=True, null=True)
     
     phone_number = models.CharField(max_length=20)
+    email_id = models.EmailField()
     address = models.TextField()
     city = models.CharField(max_length=100)
     state = models.CharField(max_length=100)
@@ -94,7 +94,7 @@ class CandidateDetails(BaseModel):
     zip_code = models.CharField(max_length=20)
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name} ({self.email}"
+        return f"{self.first_name} {self.last_name} ({self.email_id})"
     
     
 def current_year():

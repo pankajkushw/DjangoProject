@@ -38,7 +38,7 @@ class CandidateRegistrationForm(forms.ModelForm):
         model = CandidateDetails
         fields = [
             'first_name', 'last_name', 'father_name', 'mother_name', 'date_of_birth', 
-            'phone_number', 'address', 'city', 'state', 'country', 'zip_code']
+            'phone_number', 'email_id', 'address', 'city', 'state', 'country', 'zip_code']
 
         labels = {
             'first_name':'First Name',
@@ -47,6 +47,7 @@ class CandidateRegistrationForm(forms.ModelForm):
             'mother_name': 'Mother Name',
             'date_of_birth': 'Date of Birth',
             'phone_number': 'Phone Number',
+            'email_id': 'Email ID',
             'address': 'Address',
             'city': 'City',
             'state': 'State',
@@ -60,11 +61,12 @@ class CandidateRegistrationForm(forms.ModelForm):
             'mother_name':forms.TextInput(attrs={'class':'form-control'}),
             'date_of_birth': forms.DateInput(attrs={'class': 'form-control', 'id':'datepicker', 'type':'date'}),
             'phone_number':forms.TextInput(attrs={'class':'form-control'}),
+            'email_id':forms.EmailInput(attrs={'class':'form-control'}),
             'address':forms.Textarea(attrs={'class':'form-control', 'rows':3}),
             'city':forms.TextInput(attrs={'class':'form-control'}),
             'state':forms.Select(choices=STATE_CHOICE, attrs={'class':'form-control'}),
             'country':forms.TextInput(attrs={'class':'form-control'}),
-            'zip_code':forms.TextInput(attrs={'class':'form-control'}),
+            'zip_code':forms.TextInput(attrs={'class':'form-control'})
             
         }
 
