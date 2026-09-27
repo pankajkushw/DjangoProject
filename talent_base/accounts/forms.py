@@ -1,6 +1,8 @@
+from email.headerregistry import Address
+
 from django import forms
 from django.forms import inlineformset_factory
-from .models import CandidateDetails, EducationDetails, WorkExperience
+from .models import CandidateDetails, WorkExperience, EducationDetails
 
 
 STATE_CHOICE = (
@@ -75,51 +77,41 @@ class CandidateRegistrationForm(forms.ModelForm):
 class EducationDetailsForm(forms.ModelForm):
     class Meta:
         model = EducationDetails
-        exclude = ['candidate', 'percentage']
-        
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Loop to automatically apply Bootstrap styling to all fields
-        for field_name, field in self.fields.items():
-            field.widget.attrs.update({'class': 'form-control'})
+        fields = [
+            'degree', 'institution', 'university', 'year_completed', 'marks_obtained', 
+            'total_marks' ]
 
+        labels = {
+            'degree': 'Degree',
+            'institution': 'Institution',
+            'university': 'University',
+            'year_completed': 'Year of Completion',
+            'marks_obtained': 'Marks Obtained',
+            'total_marks': 'Total Marks',
+        }
+        widgets = {
+            'degree': forms.TextInput(attrs={'class':'form-control'}),
+            'institution': forms.TextInput(attrs={'class':'form-control'}),
+            'university': forms.TextInput(attrs={'class':'form-control'}),
+            'year_completed': forms.NumberInput(attrs={'class':'form-control'}),
+            'marks_obtained': forms.NumberInput(attrs={'class':'form-control'}),
+            'total_marks': forms.NumberInput(attrs={'class':'form-control'}),
+            'percentage': forms.NumberInput(attrs={'class':'form-control'})
+        }
 class WorkExperienceForm(forms.ModelForm):
+    
     class Meta:
         model = WorkExperience
-        exclude = ['candidate']
-        widgets = {
-            'start_date': forms.DateInput(attrs={'type': 'date'}),
-            'end_date': forms.DateInput(attrs={'type': 'date'}),
+        fields = ['company_name', 'position', 'start_date', 'end_date']
+        labels = {
+            'company_name': 'Name of Institution/Company',
+            'position': 'Position/Role',
+            'start_date': 'Start Date',
+            'end_date': 'End Date',
         }
-        
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Apply Bootstrap styling while preserving existing widget attributes
-        for field_name, field in self.fields.items():
-            existing_classes = field.widget.attrs.get('class', '')
-            new_classes = f"{existing_classes} form-control".strip()
-            field.widget.attrs.update({'class': new_classes})
-
-EducationFormSet = inlineformset_factory(
-    CandidateDetails, 
-    EducationDetails, 
-    form=EducationDetailsForm, 
-    extra=1,          
-    can_delete=True   
-)
-
-# Custom initialization logic if you need to pass it directly to the wizard steps
-class BaseEducationFormSet(forms.models.BaseInlineFormSet):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Ensure management form fields or deletion checkboxes get styled if neede
-
-# Define Formset AFTER the forms they use are defined
-WorkExperienceFormSet = inlineformset_factory(
-    CandidateDetails, 
-    WorkExperience, 
-    form=WorkExperienceForm, 
-    extra=1, 
-    can_delete=True
-)
-
+        widgets = {
+            'company_name': forms.TextInput(attrs={'class':'form-control'}),
+            'position': forms.TextInput(attrs={'class':'form-control'}),
+            'start_date': forms.DateInput(attrs={'class':'form-control', 'type':'date'}),
+            'end_date': forms.DateInput(attrs={'class':'form-control', 'type':'date'}),
+        } 

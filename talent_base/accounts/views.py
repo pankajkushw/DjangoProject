@@ -221,5 +221,11 @@ def recruitment_data_input(request):
             return redirect('home') # this should return the form preview page and submit
     else:
         print("reaching in else")
-        form = CandidateRegistrationForm()
-    return render(request, 'recruitment_input.html', {'form': form})
+        candidate_form = CandidateRegistrationForm()
+        education_form = EducationDetailsForm()
+        work_experience_form = WorkExperienceForm()
+    return render(request, 'recruitment_input.html', {
+        'candidate_form': candidate_form,
+        'education_form': education_form,
+        'work_experience_form': work_experience_form
+    })
